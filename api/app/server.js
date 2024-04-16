@@ -11,7 +11,7 @@ const client = async_redis.createClient(REDIS_PORT)
 
 
 client.on("error", function(error) {
-	logger.error(`Redis error. error=${error}`)
+	logger.error(`Redis error. ${error}`)
 	throw new Error(error)
 });
 
@@ -37,7 +37,7 @@ export { client }
 // if(!module.parent){
 // 	createApp().listen(PORT, (err) => {
 // 		if(err) console.log(err);
-// 		console.log(`Server started on port \'${PORT}\'`);
+// 		console.log(`Listening at http://localhost:${PORT}`);
 // 	})
 // }
 

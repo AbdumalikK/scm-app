@@ -1,6 +1,6 @@
 {
-  "name": "coreapi",
-  "version": "1.0.0",
+  "name": "api",
+  "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
   "babel": {
