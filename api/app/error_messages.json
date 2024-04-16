@@ -1,0 +1,86 @@
+{
+  "errors": {
+    "ValidationError": {
+      "type": "validation_error",
+      "error": "Error: 'object' validation failed"
+    },
+    "ObjectNotFound": {
+      "type": "object_not_found",
+      "message": "Error: 'Object' not found"
+    },
+    "PasswordNotFound": {
+      "type": "password_not_found",
+      "message": "Error: 'Password' not found"
+    },
+    "InvalidPassword": {
+      "type": "invalid_password",
+      "message": "Invalid Password"
+    },
+    "IncorrectArguments": {
+      "type": "incorrect_arguments_error",
+      "message": "Incorrect arguments"
+    },
+    "ObjectAlreadyExist": {
+      "type": "object_already_exist",
+      "error": "Error: 'object' already exist"
+    },
+    "PrivilegeError": {
+      "type": "privilege_error",
+      "error": "Privilege error"
+    },
+    "PasswordAlreadyInUse": {
+      "type": "password_already_in_use_error",
+      "message": "Password already in use"
+    },
+    "TypeNotFound": {
+      "type": "type_error",
+      "message": "Error: 'type' not found"
+    },
+    "ClientNotFound": {
+      "type": "client_not_found_error",
+      "message": "Error: 'Client' not found"
+    },
+    "ClientMustLogOut": {
+      "type": "client_must_log_out_error",
+      "message": "Error. Client must log out"
+    },
+    "UpdateError": {
+      "type": "update_error",
+      "message": "Error while updating document"
+    },
+    "GetError": {
+      "type": "get_error",
+      "message": "Error while getting document"
+    },
+    "InsertError": {
+      "type": "insert_error",
+      "message": "Error while inserting document"
+    },
+    "TemporaryStorageError": {
+      "type": "redis_error",
+      "message": "Error with temporary storage" 
+    },
+
+    "BadRequest": {
+      "type": "bad_request_error",
+      "message": "The request could not be understood by the server"
+    },
+    "Unauthorized": {
+      "type": "unauthorized_error",
+      "message": "Authorization required"
+    },
+    "Forbidden": {
+      "type": "forbidden_error",
+      "error": "You don’t have permission"
+    },
+    "NotFound": {
+      "type": "not_found_error",
+      "message": "Page not found"
+    },
+
+    "SendSMS": {
+      "type": "send_sms_error",
+      "message": "Send sms error"
+    }
+  }
+}

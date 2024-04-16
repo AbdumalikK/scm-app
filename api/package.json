@@ -1,0 +1,72 @@
+{
+  "name": "coreapi",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      "@babel/plugin-transform-async-to-generator"
+    ]
+  },
+  "scripts": {
+    "test": "ava \"**/*.test.js\"",
+    "start": "babel-node app/server",
+    "lint": "eslint app",
+    "lint:fix": "eslint --fix app",
+    "dev": "nodemon --exec yarn start"
+  },
+  "ava": {
+    "require": [
+      "@babel/register",
+      "@babel/polyfill"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-async-to-generator": "^7.2.0",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/register": "^7.0.0",
+    "ava": "^1.0.1",
+    "babel-eslint": "8.1.0",
+    "eslint": "^5.1.0",
+    "eslint-config-google": "^0.9.1",
+    "faker": "^4.1.0",
+    "nodemon": "1.17.5"
+  },
+  "dependencies": {
+    "@babel/node": "^7.2.2",
+    "@koa/cors": "2",
+    "async-redis": "^2.0.0",
+    "axios": "^1.6.8",
+    "base-64": "^0.1.0",
+    "bcrypt-nodejs": "^0.0.3",
+    "bunyan": "^1.8.12",
+    "config": "^1.30.0",
+    "dotenv": "^6.0.0",
+    "jsonwebtoken": "^8.3.0",
+    "keymirror": "^0.1.1",
+    "koa": "^2.5.2",
+    "koa-body": "^4.0.4",
+    "koa-bodyparser": "^4.2.1",
+    "koa-logger": "^3.2.0",
+    "koa-mount": "^4.0.0",
+    "koa-multer": "^1.0.2",
+    "koa-passport": "^6.0.0",
+    "koa-router": "^7.4.0",
+    "koa-session": "^6.4.0",
+    "lodash": "^4.17.10",
+    "mongoose": "^5.4.21",
+    "mongoose-unique-validator": "^2.0.1",
+    "nodemailer": "^6.9.13",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth": "^2.0.0",
+    "randomatic": "^3.1.1",
+    "supertest-koa-agent": "^0.3.0",
+    "utf8": "^3.0.0",
+    "uuid": "^3.3.2",
+    "validator": "^13.5.2"
+  }
+}

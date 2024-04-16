@@ -1,0 +1,46 @@
+{
+	"core": {
+	  "port": 3000
+	},
+	"db": {
+	  "mongo": {
+		"uri": "mongodb://localhost:27017/reverem"
+	  }
+	},
+	"redis" : {
+	  "port": 6379
+	},
+	"rabbitmq": {
+	  "uri": "amqp://localhost:5672"
+	},
+	"jwt": {
+	  "secret": "vds290df4357ty82asdwedtjkljkhgnh434tgvxcwe"
+	},
+	"key": {
+		"secret": "jfkbh28o37yrt9p28uihvp0932490t87y0o8hoijhnogivufhsp9d8y042t"
+	},
+	"google": {
+		"api": {
+			"key": "AIzaSyDmnToPF9UoeWBWcayh5rhSvhYFftx1uK8"
+		},
+		"client": {
+			"id": "613345664807-s31l821pdq0njj52u5i5l7qovq5iaat3.apps.googleusercontent.com",
+			"secret": "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"
+		}
+	},
+	"facebook": {
+		"app": {
+			"id": 871236458093697,
+			"secret": "4ada6d2f7d8299219cb4aa446d75e18a"
+		}
+	},
+	"sms": {
+	  "login": "fedorovich",
+	  "password": "Snp9v4S78L",
+	  "host": "http://91.204.239.44/broker-api/send"
+	},
+	"errors_file_path": "/error_messages.json",
+	"charset": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+	"generate_password_length": 16,
+	"upload_path": "/uploads"
+  }

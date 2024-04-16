@@ -1,0 +1,81 @@
+import mongoose from 'mongoose'
+import bcrypt from 'bcrypt-nodejs'
+import uniqueValidator from 'mongoose-unique-validator'
+
+mongoose.plugin(uniqueValidator)
+
+const UserPostSchema = new mongoose.Schema({
+	firstName: {
+		type: String,
+		trim: true,
+		default: null
+	},
+	lastName: {
+		type: String,
+		trim: true,
+		default: null
+	},
+	username: {
+		type: String,
+		trim: true,
+		required: 'User name is required'
+	},
+	refferal: {
+		type: String,
+		trim: true,
+		default: null
+	},
+	password: {
+		type: String,
+		validate: [ /^[a-zA-Z0-9@_-]{8,32}$/, `Password must contain the following "[a-zA-Z0-9@_-] and must be minimum 8 character"`],
+		required: 'Password is required',
+		trim: true
+	},
+	role: {
+		type: String,
+		enum: ['business', 'private'],
+		lowercase: true,
+		default: 'private'
+	},
+	phone: {
+		type: String,
+		default: null,
+	},
+	email: {
+		type: String,
+		default: null,
+	},
+	avatar: {
+		type: String,
+		default: null
+	},
+	deletedAt: {
+		type: Date,
+		default: null
+	},
+	active: {
+		type: Boolean,
+		default: true
+	}
+}, { timestamps: true });
+
+UserSchema.statics.createFields = [ 
+	'firstName', 'lastName', 'username', 'refferal', 'password', 'role', 
+	'phone', 'email', 'avatar'
+];
+
+UserSchema.pre('save', function(next){
+	if (this.isModified('password')) {
+		const salt = bcrypt.genSaltSync(10);
+	
+		this.password = bcrypt.hashSync(this.password, salt);
+	}
+	
+	next();
+});
+
+UserSchema.methods.comparePasswords = function(password){
+	return bcrypt.compareSync(password, this.password);
+};
+
+export default mongoose.model('user', UserSchema);
