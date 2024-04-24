@@ -35,4 +35,4 @@ const UserBlockSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-export default mongoose.model('user-block', UserBlockSchema);
+export default mongoose.model('user_block', UserBlockSchema);

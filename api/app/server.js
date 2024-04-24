@@ -1,4 +1,6 @@
 import async_redis from 'async-redis'
+import path from 'path'
+import fs from 'fs'
 
 import {
 	PORT, REDIS_PORT, ERRORS, errors
@@ -22,6 +24,13 @@ const server = app.listen(PORT, (err) => {
 
 	console.log(`Listening at http://localhost:${PORT}`);
 });
+
+const imagesDir = path.resolve(path.join(process.cwd() + '/uploads/images'))
+const videosDir = path.resolve(path.join(process.cwd() + '/uploads/videos'))
+
+if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true })
+
+if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true })
 
 
 export default server;

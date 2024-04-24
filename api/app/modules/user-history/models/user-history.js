@@ -1,15 +1,6 @@
 import mongoose from 'mongoose';
 
-const UserFollowSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    default: null, // following | followers
-    required: true
-  },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
+const UserHistorySchema = new mongoose.Schema({
   userFirstName: {
     type: String,
     default: null
@@ -26,6 +17,10 @@ const UserFollowSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  mediaUri: {
+    type: String,
+    required: true
+  },
   creatorId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true
@@ -40,4 +35,4 @@ const UserFollowSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-export default mongoose.model('user_follow', UserFollowSchema);
+export default mongoose.model('user_history', UserHistorySchema);

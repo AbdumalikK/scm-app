@@ -76,7 +76,7 @@ router
 	.get('/auth/facebook', check(), passport.authenticate('facebook'))
 	.get('/auth/facebook/callback', check(), passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/auth/failure' }))
 
-	.get('/profile', async (ctx) => {
+	.get('/prof', async (ctx) => {
 		if (ctx.isAuthenticated()) {
 			ctx.body = `Hi, ${ctx.state.user.displayName}!`;
 		} else {

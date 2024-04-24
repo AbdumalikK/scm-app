@@ -1,14 +1,18 @@
 import Router from 'koa-router'
+import path from 'path'
+import fs from 'fs'
 
 const multer = require('koa-multer')
 
 import userController from './controllers/user-controller'
+import getUser from '../../handlers/get-user'
 import checkUser from '../../handlers/checkUser'
 import checkUserId from './handlers/check-user-id'
 import checkCreatorId from './handlers/check-creator-id'
 import checkId from './handlers/check-id'
 import checkType from './handlers/check-type'
 import checkUserBlockId from './handlers/check-user-block-id'
+import checkHistoryId from './handlers/check-history-id'
 import { Image } from '../image/models'
 import { Video } from '../video/models'
 
@@ -16,10 +20,16 @@ const random = (length = 10) => (Array(length).fill(null).map(() => Math.round(M
 
 // ----- post image -----
 const imageStorage = multer.diskStorage({
-	destination: function (ctx, file, cb) {
-        const {  state: { user: { _id } } } = ctx
+	destination: async function (ctx, file, cb) {
+        const user = await getUser(ctx)
 
-        cb(null, `./uploads/images/${_id}`)
+        const imageDir = path.resolve(path.join(process.cwd() + `/uploads/images/${user._id}`))
+
+        if (!fs.existsSync(imageDir)){
+            fs.mkdirSync(imageDir, { recursive: true })
+        }
+
+        cb(null, `./uploads/images/${user._id}`)
     },
 
 	filename: function (ctx, file, cb) { cb(null, `${random()}-${Date.now()}-${file.originalname}`) }
@@ -39,10 +49,16 @@ const image = multer({
 
 // ----- post video -----
 const videoStorage = multer.diskStorage({
-	destination: function (ctx, file, cb) {
-        const {  state: { user: { _id } } } = ctx
+	destination: async function (ctx, file, cb) {
+        const user = await getUser(ctx)
 
-        cb(null, `./uploads/videos/${_id}`) 
+        const videoDir = path.resolve(path.join(process.cwd() + `/uploads/videos/${user._id}`))
+
+        if (!fs.existsSync(videoDir)){
+            fs.mkdirSync(videoDir, { recursive: true })
+        }
+
+        cb(null, `./uploads/videos/${user._id}`) 
     },
 
 	filename: function (ctx, file, cb) { cb(null, `${random()}-${Date.now()}-${file.originalname}`) }
@@ -62,10 +78,16 @@ const video = multer({
 
 // ----- ava -----
 const avaStorage = multer.diskStorage({
-	destination: function (ctx, file, cb) {
-        const {  state: { user: { _id } } } = ctx 
+	destination: async function (ctx, file, cb) {
+        const user = await getUser(ctx)
 
-        cb(null, `./uploads/images/${_id}/ava`) 
+        const avaDir = path.resolve(path.join(process.cwd() + `/uploads/images/${user._id}/ava`))
+
+        if (!fs.existsSync(avaDir)){
+            fs.mkdirSync(avaDir, { recursive: true })
+        }
+
+        cb(null, `./uploads/images/${user._id}/ava`)
     },
 
 	filename: function (ctx, file, cb) { cb(null, `${random()}-${Date.now()}-${file.originalname}`) }
@@ -77,9 +99,9 @@ const avaFilter = (ctx, file, cb) => {
 }
 
 const ava = multer({
-	storage: imageStorage,
+	storage: avaStorage,
 	limits: { maxFileSize: 1024 * 1024 * 5 }, // 50mb
-	fileFilter: imageFilter
+	fileFilter: avaFilter
 })
 // -----
 
@@ -92,11 +114,12 @@ router
     .param('creatorId', checkCreatorId())
     .param('type', checkType())
     .param('userBlockId', checkUserBlockId())
+    .param('historyId', checkHistoryId())
     
     // user
     .get('/', checkUser(), userController.getUser)
-    .put('/', checkUser(), userController.updateUser)
-    .delete('/', checkUser(), userController.deleteUser)
+    .put('/:id', checkUser(), userController.updateUser)
+    .delete('/:id', checkUser(), userController.deleteUser)
     
     // following & followers
     .get('/follow', checkUser(), userController.getFollows)
@@ -108,6 +131,13 @@ router
     .post('/block', checkUser(), userController.blockUser)
     .delete('/unblock/:userBlockId', checkUser(), userController.unblockUser)
 
+    // history
+    .post('/history', checkUser(), userController.addHistory)
+    .delete('/history/:historyId', checkUser(), userController.deleteHistory)
+
+    // post
+    .post('/post', checkUser(), userController.addPost)
+
     // ava
     .post('/upload/ava', checkUser(), ava.any('file'), async function (ctx){
         const {
@@ -115,7 +145,7 @@ router
             req: { files }
         } = ctx
 
-        const ava = null
+        let ava = null
 
         try {
             for(let i = 0; i < files.length; i++){
@@ -170,7 +200,7 @@ router
                 })
     
                 await newVideo.save()
-                videos.push(newImage)
+                videos.push(newVideo)
             }
         }catch(ex){
             ctx.status = 500

@@ -5,8 +5,10 @@ import { ERRORS } from '../config'
 import logger from '../utils/logs/logger'
 import { User } from '../modules/user/models'
 
-export default () => async (ctx, next) => {
+export default async (ctx) => {
 	const { authorization } = ctx.headers
+
+	let user = null
 
 	if(authorization) {
 		const { phone } = jwtService.verify(authorization)
@@ -20,10 +22,9 @@ export default () => async (ctx, next) => {
 			}
 		}
 
-		let user = null
 
 		try {
-			user = await User.findOne({ phone, active: true, deletedAt: { $eq: null } })
+			user = await User.findOne({ phone })
 		} catch (ex) {
 			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 500
@@ -41,9 +42,7 @@ export default () => async (ctx, next) => {
 				message: ERRORS['Unauthorized']
 			}
 		}
-
-		ctx.state.user = user	
 	}
 
-	await next()
+	return user
 }

@@ -240,7 +240,7 @@ export default {
 		 }
 
 		try {
-			user = await User.findOne({ $or: [{ phone: otpExist.type }, { email: otpExist.type }] }).select(select)
+			user = await User.findOne({ $or: [{ phone: otpExist.type }, { email: otpExist.type }], active: true, deletedAt: { $eq: null } }).select(select)
 		}catch(ex){
 			ctx.status = 404
 			return ctx.body = {

@@ -4,9 +4,10 @@ import logger from '../utils/logs/logger'
 
 export default () => async (ctx, next) => {
 	if(!ctx.state.user){
+		logger.error(`Error. Forbidden`)
 		ctx.status = 403
 		return ctx.body = {
-			status: 'error',
+			success: false,
 			message: ERRORS['Forbidden']
 		}
 	}
