@@ -1,0 +1,4 @@
+{"name":"api","hostname":"ms","pid":24650,"level":30,"msg":"INFO LOG STARTED","time":"2024-04-25T12:45:24.783Z","v":0}
+{"name":"api","hostname":"ms","pid":24650,"level":20,"msg":"DEBUG LOG STARTED","time":"2024-04-25T12:45:24.783Z","v":0}
+{"name":"api","hostname":"ms","pid":24650,"level":50,"msg":"ERROR LOG STARTED","time":"2024-04-25T12:45:24.783Z","v":0}
+{"name":"api","hostname":"ms","pid":24650,"level":30,"msg":"Mongo connected","time":"2024-04-25T12:45:25.653Z","v":0}
