@@ -1,4 +1,4 @@
-import { UserBlock } from '../../user-block/models'
+import { UserBlock } from '../../block/models'
 
 import logger from '../../../utils/logs/logger'
 

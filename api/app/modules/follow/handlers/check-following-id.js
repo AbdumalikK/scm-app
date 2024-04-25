@@ -1,18 +1,18 @@
-import { User } from '../models'
+import { Following } from '../models'
 
 import logger from '../../../utils/logs/logger'
 
 
 export default () => async (id, ctx, next) => {
     try{
-        const user = await User.findById(id)
+        const following = await Following.findById(id)
         
-        if(!user){
-            logger.error(`Error. User with id=${id} not found`)
+        if(!following){
+            logger.error(`Error. Following with id=${id} not found`)
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `User with id=${id} not found`
+                message: `Following with id=${id} not found`
             }
         }
     }catch(ex){
@@ -24,7 +24,7 @@ export default () => async (id, ctx, next) => {
         }
     }
 
-    ctx.state.userId = id
+    ctx.state.followingId = id
 
     await next()
 }

@@ -1,4 +1,4 @@
-import { UserFollow } from '../../user-follow/models'
+import { Follow } from '../../follow/models'
 
 import logger from '../../../utils/logs/logger'
 import { UserHistory } from '../../user-history/models';
@@ -29,7 +29,7 @@ export default {
         };
 
 		try{
-            const followings = await UserFollow
+            const followings = await Follow
                 .find({ creator_id: _id, active: true, deletedAt: { $eq: null } })
                 .select(select)
                 .sort({ createdAt: -1 })
@@ -93,7 +93,7 @@ export default {
             active: 0
         };
 
-        const totalPosts = await UserFollow.countDocuments({ active: true }).exec();
+        const totalPosts = await Follow.countDocuments({ active: true }).exec();
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
         result.totalPosts = totalPosts;
@@ -105,7 +105,7 @@ export default {
             };
         }
         
-        if (endIndex < (await UserFollow.countDocuments({ active: true }).exec())) {
+        if (endIndex < (await Follow.countDocuments({ active: true }).exec())) {
             result.next = {
                 page: page + 1,
                 limit: limit

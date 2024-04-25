@@ -504,12 +504,12 @@ export default {
                             }
                         }
                     }
-                }, 
+                },
                 { 
                     $set: { 
                         'comment.$[i].like.$[j].active': false,
                         'comment.$[i].like.$[j].deletedAt': new Date()
-                    } 
+                    }
                 },
                 {
                     arrayFilters: [

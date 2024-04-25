@@ -7,11 +7,7 @@ const multer = require('koa-multer')
 import userController from './controllers/user-controller'
 import getUser from '../../handlers/get-user'
 import checkUser from '../../handlers/checkUser'
-import checkUserId from './handlers/check-user-id'
-import checkCreatorId from './handlers/check-creator-id'
 import checkId from './handlers/check-id'
-import checkType from './handlers/check-type'
-import checkUserBlockId from './handlers/check-user-block-id'
 import checkHistoryId from './handlers/check-history-id'
 import { Image } from '../image/models'
 import { Video } from '../video/models'
@@ -110,33 +106,16 @@ const router = new Router({ prefix: '/profile' })
 
 router
     .param('id', checkId())
-    .param('userId', checkUserId())
-    .param('creatorId', checkCreatorId())
-    .param('type', checkType())
-    .param('userBlockId', checkUserBlockId())
     .param('historyId', checkHistoryId())
     
     // user
     .get('/', checkUser(), userController.getUser)
     .put('/:id', checkUser(), userController.updateUser)
     .delete('/:id', checkUser(), userController.deleteUser)
-    
-    // following & followers
-    .get('/follow', checkUser(), userController.getFollows)
-    .post('/follow', checkUser(), userController.addFollow)
-    .delete('/follow/:creatorId/:userId', checkUser(), userController.deleteFollow)
-
-    // block & unblock
-    .get('/block', checkUser(), userController.getBlockedUsers)
-    .post('/block', checkUser(), userController.blockUser)
-    .delete('/unblock/:userBlockId', checkUser(), userController.unblockUser)
 
     // history
     .post('/history', checkUser(), userController.addHistory)
     .delete('/history/:historyId', checkUser(), userController.deleteHistory)
-
-    // post
-    .post('/post', checkUser(), userController.addPost)
 
     // ava
     .post('/upload/ava', checkUser(), ava.any('file'), async function (ctx){
