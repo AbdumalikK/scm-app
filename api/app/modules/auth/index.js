@@ -93,8 +93,8 @@ router
 		}
 	})
 
-	.post('/forgot-password', check(), authController.forgotPassword)
-	.post('/reset-password/:id/:token', check(), authController.resetPassword)
+	.post('/auth/forgot-password', check(), authController.forgotPassword)
+	.post('/auth/reset-password/:id/:token', check(), authController.resetPassword)
 	.get('/logout', async (ctx) => {
 		ctx.logout();
 		ctx.redirect('/');

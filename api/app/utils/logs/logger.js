@@ -11,21 +11,21 @@ const logger = bunyan.createLogger({
             period: '1d',
             count: 3,
             level: 'info',
-            path: path.resolve('/var/log/api/', 'info.log')
+            path: path.resolve(path.join(process.cwd() + `/logs`), 'info.json')
         },
         {
             type: 'rotating-file',
             period: '1d',
             count: 3,
             level: 'debug',
-            path: path.resolve('/var/log/api/', 'debug.log')
+            path: path.resolve(path.join(process.cwd() + `/logs`), 'debug.json')
         },
         {
             type: 'rotating-file',
             period: '1d',
             count: 3,
             level: 'debug',
-            path: path.resolve('/var/log/api/', 'error.log')
+            path: path.resolve(path.join(process.cwd() + `/logs`), 'error.json')
         }
     ]
 })

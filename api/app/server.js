@@ -33,6 +33,11 @@ if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true })
 if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true })
 
 
+const logsDir = path.resolve(path.join(process.cwd() + '/logs'))
+
+if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true })
+
+
 export default server;
 
 export { client }

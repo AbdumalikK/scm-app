@@ -8,12 +8,11 @@ import { SIGNUP_TYPE_PHONE, SIGNUP_TYPE_EMAIL } from '../constants/types'
 import { User } from '../../user/models'
 import { SMSService } from '../../../services/sms'
 import issueTokenPair from '../../../helpers/issueTokenPair'
-import genTokenPassword from '../../../services/jwt'
-import verifyTokenPassword from '../../../services/jwt'
-
-import logger from '../../../utils/logs/logger'
+import jwtService from '../../../services/jwt'
 import { MailService } from '../../../services/mail'
 import { OtpTraffic } from '../../otp'
+
+import logger from '../../../utils/logs/logger'
 
 
 export default {
@@ -126,6 +125,9 @@ export default {
 
 		try{
 			const userData = pick(ctx.request.body, User.createFields)
+
+			// const user = await User.findOne({ username:  })
+
 
 			await User.create({ ...userData })
 		}catch(ex){
@@ -304,7 +306,7 @@ export default {
 				}
 
 				try {
-					user = await User.findOne({ phone }).select(select)
+					user = await User.findOne({ phone }).select({ __v: 0 })
 				}catch(ex){
 					ctx.status = 404
 					return ctx.body = {
@@ -338,7 +340,7 @@ export default {
 				}
 		
 				try {
-					user = await User.findOne({ email }).select(select)
+					user = await User.findOne({ email, active: true, deletedAt: { $eq: null } }).select({ __v: 0 })
 				}catch(ex){
 					ctx.status = 404
 					return ctx.body = {
@@ -372,7 +374,7 @@ export default {
 		payload['_id'] = user._id
 		payload['password'] = user.password
 
-		const token = genTokenPassword(payload, JWT_SECRET + user.password)
+		const token = jwtService.genTokenPassword(payload, JWT_SECRET + user.password)
 
 		
 		if(type === SIGNUP_TYPE_PHONE){
@@ -470,7 +472,7 @@ export default {
 			};
 		}
 
-		const payload = verifyTokenPassword(token, JWT_SECRET + user.password)
+		const payload = jwtService.verifyTokenPassword(token, JWT_SECRET + user.password)
 
 		const { password } = payload
 
