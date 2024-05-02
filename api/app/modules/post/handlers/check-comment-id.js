@@ -1,11 +1,11 @@
-import { UserPost } from '../models'
+import { Post } from '../models'
 
 import logger from '../../../utils/logs/logger'
 
 
 export default () => async (id, ctx, next) => {
     try{
-        const post = await UserPost.findOne({
+        const post = await Post.findOne({
             active: true, 
             deletedAt: { $eq: null }, 
             comment: { 
@@ -18,7 +18,6 @@ export default () => async (id, ctx, next) => {
         })
 
         if(!post){
-            logger.error(`Error. Comment with id=${id} not found`)
             ctx.status = 400
             return ctx.body = {
                 success: false,

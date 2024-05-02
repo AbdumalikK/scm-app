@@ -48,7 +48,7 @@ const UserSchema = new mongoose.Schema({
 	},
 	email: {
 		type: String,
-		default: null,
+		default: null
 	},
 	avaUri: {
 		type: String,

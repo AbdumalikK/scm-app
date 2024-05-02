@@ -59,7 +59,6 @@ export default {
                 .skip(startIndex)
                 .limit(limit)
 		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
@@ -91,7 +90,6 @@ export default {
         } = ctx
 
         if(!userId){
-            logger.error(`Error. userId=${userId}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -105,7 +103,6 @@ export default {
             const user = await User.findById(userId)
 
             if(!user){
-                logger.error(`Error. User with id=${userId} not found`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
@@ -256,7 +253,6 @@ export default {
     //     } = ctx
 
     //     if(!userId){
-    //         logger.error(`Error. userId=${userId}`)
 	// 		ctx.status = 400
 	// 		return ctx.body = {
 	// 			success: false,
@@ -270,7 +266,6 @@ export default {
     //         const user = await User.findById(userId)
 
     //         if(!user){
-    //             logger.error(`Error. User with id=${userId} not found`)
     //             ctx.status = 400
     //             return ctx.body = {
     //                 success: false,
@@ -283,7 +278,6 @@ export default {
     //             creatorId: _id
     //         })
 	// 	}catch(ex){
-	// 		logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 	// 		ctx.status = 500
 	// 		return ctx.body = {
 	// 			success: false,

@@ -53,6 +53,7 @@ passport.deserializeUser(function(obj, done) {
 
 router
 	.post('/auth/signup', check(), authController.signup)
+	.post('/auth/signup/confirm', check(), authController.signupConfirm)
 	.post('/auth/signin', check(), authController.signin)
 
 
@@ -94,7 +95,7 @@ router
 	})
 
 	.post('/auth/forgot-password', check(), authController.forgotPassword)
-	.post('/auth/reset-password/:id/:token', check(), authController.resetPassword)
+	.post('/auth/reset-password', check(), authController.resetPassword)
 	.get('/logout', async (ctx) => {
 		ctx.logout();
 		ctx.redirect('/');

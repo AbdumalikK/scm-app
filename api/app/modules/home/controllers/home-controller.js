@@ -1,7 +1,7 @@
 import { Follow } from '../../follow/models'
 
 import logger from '../../../utils/logs/logger'
-import { UserHistory } from '../../user-history/models';
+import { UserHistory } from '../../story/models';
 
 
 export default {
@@ -50,7 +50,6 @@ export default {
                 }
             }
 		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,

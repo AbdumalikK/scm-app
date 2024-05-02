@@ -27,6 +27,10 @@ const ImageSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  comment: {
+    type: String,
+    default: null
+  },
   creatorId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true

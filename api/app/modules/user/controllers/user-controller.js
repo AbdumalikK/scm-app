@@ -2,7 +2,7 @@ import pick from 'lodash/pick'
 
 import { User } from '../models'
 import { Following, Follower } from '../../follow/models'
-import { UserHistory } from '../../user-history/models'
+import { UserHistory } from '../../story/models'
 import { Image } from '../../image/models'
 import { Video } from '../../video/models'
 
@@ -66,7 +66,6 @@ export default {
         } = ctx
 
         if(_id != id){
-            logger.error(`Error. User with id=${_id} does not belong to user with id=${id}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -127,78 +126,5 @@ export default {
             success: true,
             message: `User successfully deleted`
         }
-	},
-
-    async addHistory(ctx){
-		const { 
-            request: { 
-                body: {
-                    mediaUri
-                }
-            },
-            state: {
-                user: {
-                    _id
-                }
-            }
-        } = ctx
-
-		try{
-            const user = await User.findById(_id)
-
-            if(user){
-                logger.error(`Error. User with id=${_id} not found`)
-                ctx.status = 400
-                return ctx.body = {
-                    success: false,
-                    message: `User with id=${_id} not found`
-                };
-            }
-
-            await UserHistory.create({ 
-                userFirstName: user.firstName,
-                userLastName: user.lastName,
-                userUsername: user.username,
-                userAvaUri: user.avaUri,
-                mediaUri,
-                creatorId
-            })
-		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
-			ctx.status = 500
-			return ctx.body = {
-				success: false,
-				message: `${ex.message}`
-			};
-		}
-		
-        return ctx.body = {
-            success: true,
-            message: `History successfully added`
-        }
-	},
-
-    async deleteHistory(ctx){
-		const { 
-            state: {
-                historyId
-            }
-        } = ctx
-
-		try{
-            await UserHistory.findByIdAndUpdate(historyId, { $set: { deletedAt: new Date(), active: false } })            
-		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
-			ctx.status = 500
-			return ctx.body = {
-				success: false,
-				message: `Internal error`
-			};
-		}
-		
-        return ctx.body = {
-            success: true,
-            message: 'History successfully deleted'
-        }
-	},
+	}
 };

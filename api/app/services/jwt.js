@@ -4,11 +4,11 @@ import uuid from 'uuid/v4';
 
 export default {
 	genToken(data){
-		return jwt.sign(data, JWT_SECRET, { expiresIn: '24h' });
+		return jwt.sign(data, JWT_SECRET, { expiresIn: '15d' });
 	},
 
 	genTokenPassword(data, secret){
-		return jwt.sign(data, secret, { expiresIn: '15m' })
+		return jwt.sign(data, secret, { expiresIn: '5m' })
 	},
 
 	verifyTokenPassword(token, secret){

@@ -1,5 +1,5 @@
-import UserPost from './post'
+import Post from './post'
 
 export {
-	UserPost
+	Post
 }

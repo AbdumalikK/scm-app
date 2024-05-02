@@ -1,13 +1,12 @@
-import { UserPost } from '../../post/models'
+import { Post } from '../../post/models'
 import logger from '../../../utils/logs/logger'
 
 
 export default () => async (id, ctx, next) => {
     try{
-        const post = await UserPost.findOne({ _id: id, active: true, deletedAt: { $eq: null } })
+        const post = await Post.findOne({ _id: id, active: true, deletedAt: { $eq: null } })
 
         if(!post){
-            logger.error(`Error. Post with id=${id} not found`)
             ctx.status = 400
             return ctx.body = {
                 success: false,

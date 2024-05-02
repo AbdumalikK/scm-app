@@ -8,7 +8,6 @@ export default () => async (id, ctx, next) => {
         const following = await Following.findById(id)
         
         if(!following){
-            logger.error(`Error. Following with id=${id} not found`)
             ctx.status = 400
             return ctx.body = {
                 success: false,
@@ -16,7 +15,6 @@ export default () => async (id, ctx, next) => {
             }
         }
     }catch(ex){
-        logger.error(`Error. ${ex.status} ${ex.message}`)
         ctx.status = 400
         return ctx.body = {
             success: false,

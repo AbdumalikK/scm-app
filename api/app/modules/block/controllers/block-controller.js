@@ -58,7 +58,6 @@ export default {
                 .skip(startIndex)
                 .limit(limit)
 		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
@@ -90,7 +89,6 @@ export default {
         } = ctx
 
         if(!userId){
-            logger.error(`Error. User id not passed`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -104,7 +102,6 @@ export default {
             blockedUser = await Block.findOne({ creatorId: _id, userId })
 
             if(blockedUser){
-                logger.error(`Error. User with id=${userId} already blocked`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
@@ -114,7 +111,6 @@ export default {
 
 			blockedUser = await Block.create({ creatorId: _id, userId })
 		}catch(ex){
-			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -145,7 +141,6 @@ export default {
         } = ctx
 
         if(!userId){
-            logger.error(`Error. UserId not passed`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -172,7 +167,6 @@ export default {
             ).select({ __v: 0, active: 0, deletedAt: 0 })
 
             if(!unblockedUser){
-                logger.error(`Error. Blocked user with userId=${userId} not found`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
@@ -180,7 +174,6 @@ export default {
                 };
             }
 		}catch(ex){
-			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,

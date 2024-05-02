@@ -8,7 +8,6 @@ export default () => async (id, ctx, next) => {
         const userBlock = await UserBlock.findById(id)
         
         if(!userBlock){
-            logger.error(`Error. User block with id=${id} not found`)
             ctx.status = 400
             return ctx.body = {
                 success: false,
@@ -16,7 +15,6 @@ export default () => async (id, ctx, next) => {
             }
         }
     }catch(ex){
-        logger.error(`Error. ${ex.status} ${ex.message}`)
         ctx.status = 400
         return ctx.body = {
             success: false,

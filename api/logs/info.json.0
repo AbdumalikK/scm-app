@@ -1,0 +1,5 @@
+{"name":"api","hostname":"ms","pid":6835,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-01T11:09:16.707Z","v":0}
+{"name":"api","hostname":"ms","pid":6835,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-01T11:09:16.707Z","v":0}
+{"name":"api","hostname":"ms","pid":6835,"level":30,"msg":"Mongo connected","time":"2024-05-01T11:09:17.705Z","v":0}
+{"name":"api","hostname":"ms","pid":6835,"level":50,"msg":"GET /story 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-01T11:09:27.468Z","v":0}
+{"name":"api","hostname":"ms","pid":6835,"level":50,"msg":"GET /story 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-01T11:09:39.262Z","v":0}

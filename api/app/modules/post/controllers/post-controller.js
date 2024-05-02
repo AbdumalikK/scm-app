@@ -1,7 +1,7 @@
 import pick from 'lodash/pick'
 
 import { User } from '../../user/models'
-import { UserPost } from '../models'
+import { Post } from '../models'
 
 import logger from '../../../utils/logs/logger'
 
@@ -17,9 +17,8 @@ export default {
         let post = null
 
 		try{
-            post = await UserPost.findById(postId).select({ __v: 0, active: 0, deletedAt: 0 })
+            post = await Post.findById(postId).select({ __v: 0, active: 0, deletedAt: 0 })
 		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
@@ -62,7 +61,7 @@ export default {
             active: 0
         };
 
-        const totalPosts = await UserPost.countDocuments({ active: true, deletedAt: { $eq: null } }).exec();
+        const totalPosts = await Post.countDocuments({ active: true, deletedAt: { $eq: null } }).exec();
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
         result.totalPosts = totalPosts;
@@ -73,7 +72,7 @@ export default {
                 limit: limit
             };
         }
-        if (endIndex < (await UserPost.countDocuments({ active: true, deletedAt: { $eq: null } }).exec())) {
+        if (endIndex < (await Post.countDocuments({ active: true, deletedAt: { $eq: null } }).exec())) {
             result.next = {
                 page: page + 1,
                 limit: limit
@@ -81,14 +80,13 @@ export default {
         }
 
 		try{
-            posts = await UserPost
+            posts = await Post
                 .find({ active: true, deletedAt: { $eq: null } })
                 .select(select)
                 .sort({ createdAt: -1 })
                 .skip(startIndex)
                 .limit(limit)
 		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
@@ -111,7 +109,8 @@ export default {
             request: { 
                 body: {
                     mediaUri,
-                    comment
+                    comment,
+                    tags
                 }
             },
             state: {
@@ -124,28 +123,13 @@ export default {
         let post = null
 
 		try{
-            const user = await User.findById(_id)
-
-            if(!user){
-                logger.error(`Error. User with id=${_id} not found`)
-                ctx.status = 400
-                return ctx.body = {
-                    success: false,
-                    message: `User with id=${_id} not found`
-                };
-            }
-
-            post = await UserPost.create({ 
-                firstName: user.firstName,
-                lastName: user.lastName,
-                username: user.username,
-                avaUri: user.avaUri,
+            post = await Post.create({ 
                 mediaUri,
-                creatorId: user._id,
+                creatorId: _id,
                 comment,
+                tags
             })
 		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
@@ -174,19 +158,18 @@ export default {
             }
         } = ctx
     
-        const data = pick(body, UserPost.createFields);
+        const data = pick(body, Post.createFields);
 
 		let post = {}
 
 		try{
-			post = await UserPost.findOneAndUpdate({ _id: postId, creatorId: _id }, { $set: data }).select({ 
+			post = await Post.findOneAndUpdate({ _id: postId, creatorId: _id }, { $set: data }).select({ 
                 __v: 0,
                 acive: 0,
                 deletedAt: 0
             })
 
             if(!post){
-                logger.error(`Error. Post with id=${_id} & creatorId=${_id} not found`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
@@ -194,7 +177,6 @@ export default {
                 };
             }
 		}catch(ex){
-			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -218,9 +200,8 @@ export default {
         } = ctx
 
 		try{
-            await UserPost.findByIdAndUpdate(postId, { $set: { deletedAt: new Date(), active: false } })            
+            await Post.findByIdAndUpdate(postId, { $set: { deletedAt: new Date(), active: false } })            
 		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
@@ -251,7 +232,6 @@ export default {
         } = ctx
 
         if(!payload){
-            logger.error(`Error. Payload not passed`)
             ctx.status = 400
             return ctx.body = {
                 success: false,
@@ -268,10 +248,9 @@ export default {
 		let post = {}
 
 		try{
-			post = await UserPost.findOneAndUpdate({ _id: postId, creatorId: _id }, { $push: { comment } }, { new: true }).select({ __v: 0 })
+			post = await Post.findOneAndUpdate({ _id: postId, creatorId: _id }, { $push: { comment } }, { new: true }).select({ __v: 0 })
 
             if(!post){
-                logger.error(`Error. Post with id=${_id} & creatorId=${_id} not found`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
@@ -279,7 +258,6 @@ export default {
                 };
             }
 		}catch(ex){
-			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -312,7 +290,6 @@ export default {
         } = ctx
 
         if(!payload){
-            logger.error(`Error. Payload not passed`)
             ctx.status = 400
             return ctx.body = {
                 success: false,
@@ -323,10 +300,9 @@ export default {
 		let post = {}
 
 		try{
-			post = await UserPost.findOneAndUpdate({ _id: postId, creatorId: _id, 'comment._id': commentId }, { $set: { 'comment.$.payload': payload } }, { new: true }).select({ __v: 0 })
+			post = await Post.findOneAndUpdate({ _id: postId, creatorId: _id, 'comment._id': commentId }, { $set: { 'comment.$.payload': payload } }, { new: true }).select({ __v: 0 })
 
             if(!post){
-                logger.error(`Error. Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
@@ -334,7 +310,6 @@ export default {
                 };
             }
 		}catch(ex){
-			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -364,7 +339,7 @@ export default {
 		let post = {}
 
 		try{
-			post = await UserPost.findOneAndUpdate(
+			post = await Post.findOneAndUpdate(
                 { 
                     _id: postId, 
                     creatorId: _id, 
@@ -380,15 +355,13 @@ export default {
             ).select({ __v: 0 })
 
             if(!post){
-                logger.error(`Error. Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                    message: `Post with id=${postId} & creatorId=${_id} & commentId=${commentId} not found`
                 };
             }
 		}catch(ex){
-			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -424,7 +397,7 @@ export default {
         }
 
 		try{
-            post = await UserPost.findOne({
+            post = await Post.findOne({
                 _id: postId, 
                 creatorId: _id,
                 comment: {
@@ -440,7 +413,6 @@ export default {
             })
 
             if(post){
-                logger.error(`Error. Like already exists`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
@@ -448,10 +420,9 @@ export default {
                 };
             }
 
-			post = await UserPost.findOneAndUpdate({ _id: postId, creatorId: _id, 'comment._id': commentId }, { $push: { 'comment.$.like': data } }, { new: true }).select({ __v: 0 })
+			post = await Post.findOneAndUpdate({ _id: postId, creatorId: _id, 'comment._id': commentId }, { $push: { 'comment.$.like': data } }, { new: true }).select({ __v: 0 })
 
             if(!post){
-                logger.error(`Error. Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
@@ -459,7 +430,6 @@ export default {
                 };
             }
 		}catch(ex){
-			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -490,7 +460,7 @@ export default {
 		let post = {}
 
 		try{
-			post = await UserPost.findOneAndUpdate(
+			post = await Post.findOneAndUpdate(
                 { 
                     _id: postId, 
                     creatorId: _id,
@@ -525,11 +495,420 @@ export default {
             ).select({ __v: 0 })
 
             if(!post){
-                logger.error(`Error. Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`)
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
                     message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                };
+            }
+		}catch(ex){
+			logger.error(`Error. ${ex.status} ${ex.message}`)
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Internal error`
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: {
+                post
+            }
+        }
+	},
+
+    async addPostCommentReply(ctx){
+		const { 
+            request: { 
+                body: {
+                    payload = null
+                }
+            },
+            state: {
+                user: {
+                    _id
+                },
+                postId,
+                commentId
+            }
+        } = ctx
+
+        if(!payload){
+            ctx.status = 400
+            return ctx.body = {
+                success: false,
+                message: `Payload not passed`
+            };
+        }
+
+        const reply = {
+            creatorId: _id,
+            createdAt: new Date(),
+            payload
+        }
+
+		let post = {}
+
+		try{
+			post = await Post.findOneAndUpdate(
+                { 
+                    _id: postId, 
+                    creatorId: _id,
+                    comment: {
+                        $elemMatch: {
+                            _id: commentId
+                        }
+                    }
+                },
+                { 
+                    $push: { 
+                        'comment.$[i].reply': reply,
+                    }
+                },
+                {
+                    arrayFilters: [
+                        {
+                            'i._id': commentId
+                        }
+                    ],
+                    new: true
+                }
+            ).select({ __v: 0 })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                };
+            }
+		}catch(ex){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Internal error`
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: {
+                post
+            }
+        }
+	},
+
+    async updatePostCommentReply(ctx){
+		const { 
+            request: { 
+                body: {
+                    payload = null
+                }
+            },
+            state: {
+                user: {
+                    _id
+                },
+                postId,
+                commentId,
+                replyId
+            }
+        } = ctx
+
+        if(!payload){
+            ctx.status = 400
+            return ctx.body = {
+                success: false,
+                message: `Payload not passed`
+            };
+        }
+
+		let post = {}
+
+		try{
+			post = await Post.findOneAndUpdate(
+                { 
+                    _id: postId, 
+                    creatorId: _id,
+                    comment: {
+                        $elemMatch: {
+                            _id: commentId
+                        }
+                    }
+                }, 
+                { 
+                    $set: { 
+                        'comment.$[i].reply.$[j].payload': payload,
+                    }
+                }, 
+                { 
+                    arrayFilters: [
+                        {
+                            'i._id': commentId
+                        }, 
+                        {
+                            'j._id': replyId
+                        }
+                    ],
+                    new: true 
+                }
+            ).select({ __v: 0 })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`
+                };
+            }
+		}catch(ex){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Internal error`
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: {
+                post
+            }
+        }
+	},
+
+    async deletePostCommentReply(ctx){
+		const {
+            state: {
+                user: {
+                    _id
+                },
+                postId,
+                commentId,
+                replyId
+            }
+        } = ctx
+
+		let post = {}
+
+		try{
+			post = await Post.findOneAndUpdate(
+                { 
+                    _id: postId, 
+                    creatorId: _id,
+                    comment: {
+                        $elemMatch: {
+                            _id: commentId,
+                            reply: {
+                                $elemMatch: {
+                                    _id: replyId
+                                }
+                            }
+                        }
+                    }
+                }, 
+                { 
+                    $set: { 
+                        'comment.$[i].reply.$[j].active': false,
+                        'comment.$[i].reply.$[j].deletedAt': new Date(),
+                    }
+                }, 
+                { 
+                    arrayFilters: [
+                        {
+                            'i._id': commentId
+                        }, 
+                        {
+                            'j._id': replyId
+                        }
+                    ],
+                    new: true 
+                }
+            ).select({ __v: 0 })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${postId} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`
+                };
+            }
+		}catch(ex){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Internal error`
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: {
+                post
+            }
+        }
+	},
+
+
+    async addPostCommentReplyLike(ctx){
+		const {
+            state: {
+                user: {
+                    _id
+                },
+                postId,
+                commentId,
+                replyId
+            }
+        } = ctx
+
+		let post = {}
+
+        const data = {
+            creatorId: _id,
+            createdAt: new Date()
+        }
+
+		try{
+            post = await Post.findOne({
+                _id: postId, 
+                creatorId: _id,
+                comment: {
+                    $elemMatch: {
+                        _id: commentId,
+                        reply: {
+                            $elemMatch: {
+                                _id: replyId,
+                                like: {
+                                    $elemMatch: {
+                                        creatorId: _id
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+
+            if(post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Like already exists`
+                };
+            }
+
+			post = await Post.findOneAndUpdate(
+                { 
+                    _id: postId, 
+                    creatorId: _id, 
+                    'comment._id': commentId 
+                }, 
+                { 
+                    $push: { 
+                        'comment.$[i].reply.$[j].like': data 
+                    } 
+                }, 
+                { 
+                    arrayFilters: [
+                        {
+                            'i._id': commentId
+                        }, 
+                        {
+                            'j._id': replyId
+                        }
+                    ],
+                    new: true 
+                }
+            ).select({ __v: 0 })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                };
+            }
+		}catch(ex){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Internal error`
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: {
+                post
+            }
+        }
+	},
+
+    async deletePostCommentReplyLike(ctx){
+		const {
+            state: {
+                user: {
+                    _id
+                },
+                postId,
+                commentId,
+                replyId,
+                replyLikeId
+            }
+        } = ctx
+
+		let post = {}
+
+		try{
+			post = await Post.findOneAndUpdate(
+                { 
+                    _id: postId, 
+                    creatorId: _id,
+                    comment: {
+                        $elemMatch: {
+                            _id: commentId,
+                            reply: {
+                                $elemMatch: {
+                                    _id: replyId,
+                                    like: {
+                                        $elemMatch: {
+                                            _id: replyLikeId
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                { 
+                    $set: { 
+                        'comment.$[i].reply.$[j].like.$[k].active': false,
+                        'comment.$[i].reply.$[j].like.$[k].deletedAt': new Date()
+                    }
+                },
+                {
+                    arrayFilters: [
+                        {
+                            'i._id': commentId
+                        }, 
+                        {
+                            'j._id': replyId
+                        }, 
+                        {
+                            'k._id': replyLikeId
+                        }
+                    ],
+                    new: true
+                }
+            ).select({ __v: 0 })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`
                 };
             }
 		}catch(ex){

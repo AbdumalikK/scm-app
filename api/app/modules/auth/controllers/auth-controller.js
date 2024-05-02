@@ -3,7 +3,7 @@ import randomatic from 'randomatic'
 
 import { ERRORS, JWT_SECRET } from '../../../config'
 import { client } from '../../../server'
-import { SIGNUP_PAYLOAD } from '../constants'
+import { SIGNUP_PAYLOAD, FORGOT_PASSWORD_PAYLOAD } from '../constants'
 import { SIGNUP_TYPE_PHONE, SIGNUP_TYPE_EMAIL } from '../constants/types'
 import { User } from '../../user/models'
 import { SMSService } from '../../../services/sms'
@@ -11,8 +11,6 @@ import issueTokenPair from '../../../helpers/issueTokenPair'
 import jwtService from '../../../services/jwt'
 import { MailService } from '../../../services/mail'
 import { OtpTraffic } from '../../otp'
-
-import logger from '../../../utils/logs/logger'
 
 
 export default {
@@ -37,7 +35,7 @@ export default {
 			};
 		}
 
-		let auth = {}
+		let auth = {}, to = null
 
 		switch(type){
 			case SIGNUP_TYPE_PHONE: {
@@ -52,6 +50,27 @@ export default {
 					};
 				}
 
+				try{
+					const user = await User.findOne({ phone })
+		
+					if(user){
+						ctx.status = 400
+						return ctx.body = {
+							success: false,
+							message: `User with phone=${userData.phone} already exists`
+						};
+					}
+		
+					await User.create({ phone, password, username, refferal })
+				}catch(ex){
+					ctx.status = 500
+					return ctx.body = {
+						success: false,
+						message: `Internal error. ${ex.status} ${ex.message}`
+					};
+				}
+
+				to = phone
 				auth['type'] = phone
 				break
 			}
@@ -68,6 +87,27 @@ export default {
 					};
 				}
 
+				try{
+					const user = await User.findOne({ email: userData.email })
+		
+					if(user){
+						ctx.status = 400
+						return ctx.body = {
+							success: false,
+							message: `User with email=${userData.email} already exists`
+						};
+					}
+		
+					await User.create({ email, password, username, refferal })
+				}catch(ex){
+					ctx.status = 500
+					return ctx.body = {
+						success: false,
+						message: `Internal error. ${ex.status} ${ex.message}`
+					};
+				}
+
+				to = email
 				auth['type'] = phone
 				break
 			}
@@ -80,8 +120,6 @@ export default {
 				};
 			}
 		}
-
-		const to = type === SIGNUP_TYPE_PHONE ? phone : email
 
 		// check last otp date, date > 2 min then ok else error 
 		try{
@@ -114,22 +152,7 @@ export default {
 		const otp = randomatic('0', 4)
 
 		try{
-			await client.set(otp, JSON.stringify(auth), 'EX', 60 * 15)
-		}catch(ex){
-			ctx.status = 500
-			return ctx.body = {
-				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
-			};
-		}
-
-		try{
-			const userData = pick(ctx.request.body, User.createFields)
-
-			// const user = await User.findOne({ username:  })
-
-
-			await User.create({ ...userData })
+			await client.set(otp, JSON.stringify(auth), 'EX', 60 * 5)
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
@@ -192,7 +215,7 @@ export default {
 		}
 	},
 
-	async signin(ctx){
+	async signupConfirm(ctx){
 		const {
 			request: {
 				body: {
@@ -271,6 +294,83 @@ export default {
 		}
 	},
 
+	async signin(ctx){
+		const {
+			request: {
+				body: {
+					username = null,
+					password = null
+				}
+			}
+		} = ctx
+
+		if(!username){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Username not passed`
+			}
+		}
+
+		if(!password){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Password not passed`
+			}
+		}
+
+		let user = null
+
+		const select = { 
+			__v: 0,
+			deletedAt: 0,
+			updatedAt: 0,
+			createdAt: 0,
+			active: 0,
+			password: 0
+		 }
+
+		try {
+			user = await User.findOne({ $or: [{ phone: username }, { email: username }, { username }], active: true, deletedAt: { $eq: null } })
+		}catch(ex){
+			ctx.status = 404
+			return ctx.body = {
+				success: false,
+				message: `User not found`
+			}
+		}
+
+		if(!(user).comparePasswords(password)){
+			ctx.status = 403
+			return ctx.body = {
+				success: false, 
+				message: 'Invalid password' 
+			}
+		}
+
+		try {
+			user = await User.findById(user._id).select(select)
+			
+			const { token, refreshToken } = await issueTokenPair(user.username, user)
+
+			ctx.body = {
+				success: true,
+				message: {
+					user,
+					token,
+					refreshToken
+				}
+			}
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`
+			}
+		}
+	},
+
 	async forgotPassword(ctx){
 		const {
 			request: {
@@ -306,7 +406,7 @@ export default {
 				}
 
 				try {
-					user = await User.findOne({ phone }).select({ __v: 0 })
+					user = await User.findOne({ phone, active: true, deletedAt: { $eq: null } }).select({ __v: 0 })
 				}catch(ex){
 					ctx.status = 404
 					return ctx.body = {
@@ -374,9 +474,20 @@ export default {
 		payload['_id'] = user._id
 		payload['password'] = user.password
 
-		const token = jwtService.genTokenPassword(payload, JWT_SECRET + user.password)
+		const otp = randomatic('0', 4)
 
-		
+		try{
+			await client.set(otp, JSON.stringify(payload), 'EX', 60 * 5)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`
+			};
+		}
+
+		// const token = jwtService.genTokenPassword(payload, JWT_SECRET + user.password)		
+
 		if(type === SIGNUP_TYPE_PHONE){
 			return SMSService(phone, FORGOT_PASSWORD_PAYLOAD(otp))
 			.then(data => {
@@ -394,10 +505,8 @@ export default {
 				}
 			})
 		}else{
-			const link = `http://localhost:3000/auth/resset-password/${user._id}${token}`
-
 			try {
-				const info = await MailService(email, link, username);
+				const info = await MailService(user.email, otp, user.username);
 				console.log('Message sent: %s', info.messageId);
 				
 				ctx.status = 201
@@ -420,9 +529,8 @@ export default {
 			request: {
 				body: {
 					type = null,
-					_id = null,
-					token = null,
-					otp = null
+					otp = null,
+					password
 				}
 			}
 		} = ctx
@@ -435,18 +543,40 @@ export default {
 			};
 		}
 
-		if(!_id){
+		if(!otp){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Id is null`
+				message: `Type is null`
 			};
+		}
+
+		let otpExist = null
+
+		try{
+			otpExist = JSON.parse(await client.get(otp))
+
+			await client.del(otp)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`
+			};
+		}
+
+		if(!otpExist){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Otp not found`
+			}
 		}
 
 		let user = null
 
 		try {
-			user = await User.findById(_id)
+			user = await User.findById(otpExist._id).select({ password: 1 })
 		}catch(ex){
 			ctx.status = 404
 			return ctx.body = {
@@ -459,23 +589,19 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `User with email=${email} not found`
+				message: `User with ${type == SIGNUP_TYPE_PHONE ? `phone=${otpExist.phone}` : `email=${otpExist.email}`} not found`
 			};
 		}
 
 
-		if(_id !== user._id){
+		if(otpExist._id != user._id){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
 				message: `User with _id=${_id} does not belong to user with _id=${user._id}`
 			};
 		}
-
-		const payload = jwtService.verifyTokenPassword(token, JWT_SECRET + user.password)
-
-		const { password } = payload
-
+		
 		user.password = password
 		await user.save()
 

@@ -2,17 +2,15 @@ import jwtService from '../services/jwt'
 
 import { ERRORS } from '../config'
 
-import logger from '../utils/logs/logger'
 import { User } from '../modules/user/models'
 
 export default () => async (ctx, next) => {
 	const { authorization } = ctx.headers
 
 	if(authorization) {
-		const { phone } = jwtService.verify(authorization)
+		const { phone, email, username } = jwtService.verify(authorization)
 
-		if (!phone) {
-			logger.error(`Error. Phone not found`)
+		if (!phone && !email && !username) {
 			ctx.status = 401
 			return ctx.body = {
 				sucess: false,
@@ -20,12 +18,13 @@ export default () => async (ctx, next) => {
 			}
 		}
 
+		const cred = phone || email || username
+
 		let user = null
 
 		try {
-			user = await User.findOne({ phone, active: true, deletedAt: { $eq: null } })
+			user = await User.findOne({ $or: [{ phone: cred }, { email: cred }, { username: cred }], active: true, deletedAt: { $eq: null } })
 		} catch (ex) {
-			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
@@ -34,7 +33,6 @@ export default () => async (ctx, next) => {
 		}
 
 		if (!user) {
-			logger.error(`Error. User not found`)
 			ctx.status = 401
 			return ctx.body = {
 				success: false,
