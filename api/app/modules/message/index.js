@@ -9,7 +9,6 @@ const router = new Router({ prefix: '/message' })
 router
     .param('id', checkId())
 
-    // followings
     .get('/', checkUser(), messageController.getMessages)
     .post('/', checkUser(), messageController.addMessage)
     .patch('/:id', checkUser(), messageController.updateMessage)

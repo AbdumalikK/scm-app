@@ -1,83 +1,28 @@
-{"name":"api","hostname":"ms","pid":5205,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T08:02:57.492Z","v":0}
-{"name":"api","hostname":"ms","pid":5205,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T08:02:57.492Z","v":0}
-{"name":"api","hostname":"ms","pid":5205,"level":30,"msg":"Mongo connected","time":"2024-05-02T08:03:03.724Z","v":0}
-{"name":"api","hostname":"ms","pid":5205,"level":50,"msg":"POST /post/662910869de2f56b280b7323/comment/662910869de2f56b280b7324/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T08:59:41.547Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T09:00:58.691Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T09:00:58.691Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":30,"msg":"Mongo connected","time":"2024-05-02T09:00:59.636Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"POST /post/662910869de2f56b280b7323/comment/662910869de2f56b280b7324/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:01:02.054Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"POST /post/662910869de2f56b280b7323/comment/662910869de2f56b280b7324/like/662910909de2f56b280b7332 404 29 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:01:14.318Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"POST /post/662910869de2f56b280b7323/comment/662910869de2f56b280b7324 404 29 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:01:45.468Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"POST /post/ 404 385 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:01:57.717Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"POST /auth/signin 404 59 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:02:07.447Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"POST /post/662910869de2f56b280b7323/comment/662910869de2f56b280b7324 404 29 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:02:11.900Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"POST /post/ 404 385 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:02:15.828Z","v":0}
-{"name":"api","hostname":"ms","pid":10616,"level":50,"msg":"POST /post/ 404 385 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:02:51.027Z","v":0}
-{"name":"api","hostname":"ms","pid":10847,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T09:03:24.600Z","v":0}
-{"name":"api","hostname":"ms","pid":10847,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T09:03:24.601Z","v":0}
-{"name":"api","hostname":"ms","pid":10847,"level":30,"msg":"Mongo connected","time":"2024-05-02T09:03:25.750Z","v":0}
-{"name":"api","hostname":"ms","pid":10847,"level":50,"msg":"POST /post/ 404 385 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:03:27.018Z","v":0}
-{"name":"api","hostname":"ms","pid":10847,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/662910869de2f56b280b7324 404 29 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:03:36.161Z","v":0}
-{"name":"api","hostname":"ms","pid":10847,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment 404 29 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:03:49.448Z","v":0}
-{"name":"api","hostname":"ms","pid":10847,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/like 404 0 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:04:08.619Z","v":0}
-{"name":"api","hostname":"ms","pid":10847,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:04:50.393Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T09:10:20.411Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T09:10:20.412Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":30,"msg":"Mongo connected","time":"2024-05-02T09:10:21.478Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:12:22.918Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:13:23.216Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:13:45.656Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:14:28.190Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:14:56.573Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:15:05.976Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:15:20.331Z","v":0}
-{"name":"api","hostname":"ms","pid":11280,"level":50,"msg":"PATCH /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/66335732211a942a5f3d13ad 404 30 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:15:49.440Z","v":0}
-{"name":"api","hostname":"ms","pid":11710,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T09:19:25.187Z","v":0}
-{"name":"api","hostname":"ms","pid":11710,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T09:19:25.187Z","v":0}
-{"name":"api","hostname":"ms","pid":11710,"level":30,"msg":"Mongo connected","time":"2024-05-02T09:19:26.270Z","v":0}
-{"name":"api","hostname":"ms","pid":11710,"level":50,"msg":"DELETE /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/66335732211a942a5f3d13ad 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:29:03.080Z","v":0}
-{"name":"api","hostname":"ms","pid":11710,"level":50,"msg":"DELETE /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/66335732211a942a5f3d13ad 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:29:10.257Z","v":0}
-{"name":"api","hostname":"ms","pid":11710,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/66335732211a942a5f3d13ad/like 404 0 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:45:43.188Z","v":0}
-{"name":"api","hostname":"ms","pid":13070,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T09:45:52.948Z","v":0}
-{"name":"api","hostname":"ms","pid":13070,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T09:45:52.948Z","v":0}
-{"name":"api","hostname":"ms","pid":13070,"level":30,"msg":"Mongo connected","time":"2024-05-02T09:45:54.022Z","v":0}
-{"name":"api","hostname":"ms","pid":13070,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/66335732211a942a5f3d13ad/like 404 0 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:45:58.810Z","v":0}
-{"name":"api","hostname":"ms","pid":13070,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply 404 28 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:46:06.658Z","v":0}
-{"name":"api","hostname":"ms","pid":13070,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/663358f611592d2c108e904c/like 404 0 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:46:10.638Z","v":0}
-{"name":"api","hostname":"ms","pid":13070,"level":50,"msg":"DELETE /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/663358f611592d2c108e904c/like/663360e2d3b7b1330e06a9d1 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:47:12.351Z","v":0}
-{"name":"api","hostname":"ms","pid":13535,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T09:52:19.255Z","v":0}
-{"name":"api","hostname":"ms","pid":13535,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T09:52:19.255Z","v":0}
-{"name":"api","hostname":"ms","pid":13535,"level":30,"msg":"Mongo connected","time":"2024-05-02T09:52:20.181Z","v":0}
-{"name":"api","hostname":"ms","pid":13535,"level":50,"msg":"DELETE /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/663358f611592d2c108e904c/like/663360e2d3b7b1330e06a9d1 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:52:22.025Z","v":0}
-{"name":"api","hostname":"ms","pid":13535,"level":50,"msg":"POST /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/663358f611592d2c108e904c/like 404 0 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:53:03.386Z","v":0}
-{"name":"api","hostname":"ms","pid":13535,"level":50,"msg":"DELETE /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/663358f611592d2c108e904c/like/663360e2d3b7b1330e06a9d1 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:53:10.287Z","v":0}
-{"name":"api","hostname":"ms","pid":13646,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T09:53:46.611Z","v":0}
-{"name":"api","hostname":"ms","pid":13646,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T09:53:46.611Z","v":0}
-{"name":"api","hostname":"ms","pid":13646,"level":30,"msg":"Mongo connected","time":"2024-05-02T09:53:47.769Z","v":0}
-{"name":"api","hostname":"ms","pid":13646,"level":50,"msg":"DELETE /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/663358f611592d2c108e904c/like/663360e2d3b7b1330e06a9d1 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:53:49.211Z","v":0}
-{"name":"api","hostname":"ms","pid":13646,"level":50,"msg":"Error. undefined likeId is not defined","time":"2024-05-02T09:53:49.232Z","v":0}
-{"name":"api","hostname":"ms","pid":13732,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T09:54:21.705Z","v":0}
-{"name":"api","hostname":"ms","pid":13732,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T09:54:21.705Z","v":0}
-{"name":"api","hostname":"ms","pid":13732,"level":30,"msg":"Mongo connected","time":"2024-05-02T09:54:22.679Z","v":0}
-{"name":"api","hostname":"ms","pid":13732,"level":50,"msg":"DELETE /post/663356df211a942a5f3d1398/comment/663356df211a942a5f3d1399/reply/663358f611592d2c108e904c/like/663360e2d3b7b1330e06a9d1 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T09:54:28.236Z","v":0}
-{"name":"api","hostname":"ms","pid":14361,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T10:08:31.855Z","v":0}
-{"name":"api","hostname":"ms","pid":14361,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T10:08:31.856Z","v":0}
-{"name":"api","hostname":"ms","pid":14361,"level":30,"msg":"Mongo connected","time":"2024-05-02T10:08:32.924Z","v":0}
-{"name":"api","hostname":"ms","pid":14451,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T10:09:12.809Z","v":0}
-{"name":"api","hostname":"ms","pid":14451,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T10:09:12.810Z","v":0}
-{"name":"api","hostname":"ms","pid":14451,"level":30,"msg":"Mongo connected","time":"2024-05-02T10:09:13.783Z","v":0}
-{"name":"api","hostname":"ms","pid":14451,"level":50,"msg":"POST /post/ 404 415 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:10:17.560Z","v":0}
-{"name":"api","hostname":"ms","pid":14451,"level":50,"msg":"GET /saved 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:51:19.824Z","v":0}
-{"name":"api","hostname":"ms","pid":14451,"level":50,"msg":"GET /saved 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:52:02.692Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-02T10:52:37.535Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-02T10:52:37.536Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":30,"msg":"Mongo connected","time":"2024-05-02T10:52:38.575Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"GET /saved 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:52:40.412Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"POST /saved/ 404 44 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:53:32.492Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"POST /saved/ 404 44 - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:54:25.390Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"GET /saved 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:54:28.134Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"DELETE /saved/663370e1804fb73fba004f64 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:54:41.256Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"DELETE /saved/663370e1804fb73fba004f64 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:54:48.808Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"GET /saved 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:54:53.579Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"GET /post 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:55:35.128Z","v":0}
-{"name":"api","hostname":"ms","pid":16314,"level":50,"msg":"GET /post/663366891376613873a999f5 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-02T10:56:58.292Z","v":0}
+{"name":"api","hostname":"ms","pid":11916,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-03T06:27:14.589Z","v":0}
+{"name":"api","hostname":"ms","pid":11916,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-03T06:27:14.589Z","v":0}
+{"name":"api","hostname":"ms","pid":11916,"level":30,"msg":"Mongo connected","time":"2024-05-03T06:27:15.436Z","v":0}
+{"name":"api","hostname":"ms","pid":11916,"level":50,"msg":"GET /search?type=1&search=user 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-03T06:27:17.378Z","v":0}
+{"name":"api","hostname":"ms","pid":12121,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-03T06:30:48.847Z","v":0}
+{"name":"api","hostname":"ms","pid":12121,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-03T06:30:48.848Z","v":0}
+{"name":"api","hostname":"ms","pid":12121,"level":30,"msg":"Mongo connected","time":"2024-05-03T06:30:49.732Z","v":0}
+{"name":"api","hostname":"ms","pid":12121,"level":50,"msg":"GET /search?type=1&search=user 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-03T06:30:58.730Z","v":0}
+{"name":"api","hostname":"ms","pid":12215,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-03T06:31:55.862Z","v":0}
+{"name":"api","hostname":"ms","pid":12215,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-03T06:31:55.862Z","v":0}
+{"name":"api","hostname":"ms","pid":12215,"level":30,"msg":"Mongo connected","time":"2024-05-03T06:31:56.687Z","v":0}
+{"name":"api","hostname":"ms","pid":12215,"level":50,"msg":"GET /search?type=1&search=user 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-03T06:31:59.038Z","v":0}
+{"name":"api","hostname":"ms","pid":12312,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-03T06:33:12.550Z","v":0}
+{"name":"api","hostname":"ms","pid":12312,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-03T06:33:12.550Z","v":0}
+{"name":"api","hostname":"ms","pid":12312,"level":30,"msg":"Mongo connected","time":"2024-05-03T06:33:13.475Z","v":0}
+{"name":"api","hostname":"ms","pid":12312,"level":50,"msg":"GET /search?type=1&search=user 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-03T06:33:15.975Z","v":0}
+{"name":"api","hostname":"ms","pid":12363,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-03T06:33:27.541Z","v":0}
+{"name":"api","hostname":"ms","pid":12363,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-03T06:33:27.541Z","v":0}
+{"name":"api","hostname":"ms","pid":12363,"level":30,"msg":"Mongo connected","time":"2024-05-03T06:33:28.431Z","v":0}
+{"name":"api","hostname":"ms","pid":12363,"level":50,"msg":"GET /search?type=1&search=user 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-03T06:33:31.116Z","v":0}
+{"name":"api","hostname":"ms","pid":12528,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-03T06:35:32.003Z","v":0}
+{"name":"api","hostname":"ms","pid":12528,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-03T06:35:32.003Z","v":0}
+{"name":"api","hostname":"ms","pid":12528,"level":30,"msg":"Mongo connected","time":"2024-05-03T06:35:32.908Z","v":0}
+{"name":"api","hostname":"ms","pid":12528,"level":50,"msg":"GET /search?type=2&search=user 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-03T06:35:52.808Z","v":0}
+{"name":"api","hostname":"ms","pid":12528,"level":50,"msg":"GET /search?type=2&search=user 404 undefined - PostmanRuntime/7.37.3 127.0.0.1:3000. Message: Not Found","time":"2024-05-03T06:36:04.387Z","v":0}
+{"name":"api","hostname":"ms","pid":14223,"level":30,"msg":"INFO LOG STARTED","time":"2024-05-03T07:07:54.080Z","v":0}
+{"name":"api","hostname":"ms","pid":14223,"level":50,"msg":"ERROR LOG STARTED","time":"2024-05-03T07:07:54.080Z","v":0}
+{"name":"api","hostname":"ms","pid":14223,"level":30,"msg":"Mongo connected","time":"2024-05-03T07:07:55.146Z","v":0}

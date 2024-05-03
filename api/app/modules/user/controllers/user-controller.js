@@ -2,7 +2,6 @@ import pick from 'lodash/pick'
 
 import { User } from '../models'
 import { Following, Follower } from '../../follow/models'
-import { UserHistory } from '../../story/models'
 import { Image } from '../../image/models'
 import { Video } from '../../video/models'
 

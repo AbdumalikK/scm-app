@@ -195,21 +195,4 @@ router
         }
     })
     
-    // // following & followers
-    // .get('/follow', checkUser(), userController.getFollows)
-    // .post('/follow', checkUser(), userController.addFollow)
-    // .delete('/follow/:creatorId/:userId', checkUser(), userController.deleteFollow)
-
-    // // block & unblock
-    // .get('/block', checkUser(), userController.getBlockedUsers)
-    // .post('/block', checkUser(), userController.blockUser)
-    // .delete('/unblock/:userBlockId', checkUser(), userController.unblockUser)
-
-    // // history
-    // .post('/history', checkUser(), userController.addHistory)
-    // .delete('/history/:historyId', checkUser(), userController.deleteHistory)
-
-    // // post
-    // .post('/post', checkUser(), userController.addPost)
-
 export default router.routes()

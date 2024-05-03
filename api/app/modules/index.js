@@ -11,6 +11,8 @@ import chat from './chat'
 import message from './message'
 import story from './story'
 import saved from './saved'
+import report from './report'
+import search from './search'
 
 const router = new Router()
 
@@ -25,6 +27,8 @@ router.use(chat)
 router.use(message)
 router.use(story)
 router.use(saved)
+router.use(report)
+router.use(search)
 
 
 export default router.routes()

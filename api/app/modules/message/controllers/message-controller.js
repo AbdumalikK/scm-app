@@ -201,7 +201,7 @@ export default {
 	},
 
     async deleteMessage(ctx){
-		const { 
+        const { 
             state: { 
                 user: {
                     _id
@@ -210,7 +210,7 @@ export default {
             }
         } = ctx
 
-		try{
+        try{
             await Message.findOneAndUpdate({
                 _id: id,
                 creatorId: _id
@@ -220,18 +220,18 @@ export default {
                     deletedAt: new Date()
                 } 
             })            
-		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
-			ctx.status = 500
-			return ctx.body = {
-				success: false,
-				message: `Internal error`
-			};
-		}
-		
+        }catch(ex){
+            logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
+            ctx.status = 500
+            return ctx.body = {
+                success: false,
+                message: `Internal error`
+            };
+        }
+        
         return ctx.body = {
             success: true,
             message: 'Message successfully deleted'
         }
-	},
+    },
 };
