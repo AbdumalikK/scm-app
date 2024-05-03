@@ -1,10 +1,10 @@
-import { Report } from '../models'
+import { Post } from '../../post/models'
 
 import logger from '../../../utils/logs/logger'
 
 
 export default {
-    async getReports(ctx){
+    async getArchives(ctx){
 		const { 
             request: {
                 query
@@ -27,9 +27,9 @@ export default {
         }
 
 
-        let reports = null
+        let posts = null
 
-        const totalPosts = await Report.countDocuments({ active: true, deletedAt: { $eq: null } }).exec();
+        const totalPosts = await Post.countDocuments({ creatorId: _id, active: false, deletedAt: { $eq: null } }).exec();
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit
         result.totalPosts = totalPosts;
@@ -40,7 +40,7 @@ export default {
                 limit: limit
             };
         }
-        if (endIndex < (await Report.countDocuments({ active: true, deletedAt: { $eq: null } }).exec())) {
+        if (endIndex < (await Post.countDocuments({ creatorId: _id, active: false, deletedAt: { $eq: null } }).exec())) {
             result.next = {
                 page: page + 1,
                 limit: limit
@@ -48,8 +48,8 @@ export default {
         }
 
 		try{
-            reports = await Report
-                .find({ active: true, deletedAt: { $eq: null } })
+            posts = await Post
+                .find({ creatorId: _id, active: false, deletedAt: { $eq: null } })
                 .select(select)
                 .sort({ createdAt: -1 })
                 .skip(startIndex)
@@ -65,71 +65,9 @@ export default {
         return ctx.body = {
             success: true,
             message: {
-                reports,
+                posts,
                 pagination: result
             }
         }
 	},
-    
-    async addReport(ctx){
-		const { 
-            request: { 
-                body
-            },
-            state: {
-                user: {
-                    _id
-                }
-            }
-        } = ctx
-
-        const data = pick(body, Report.createFields);
-
-        let report = null
-
-		try{
-            report = await Report.create({ ...data, creatorId: _id })
-		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
-			ctx.status = 500
-			return ctx.body = {
-				success: false,
-				message: `${ex.message}`
-			};
-		}
-		
-        return ctx.body = {
-            success: true,
-            message: { 
-                report
-            }
-        }
-	},
-
-    async deleteReport(ctx){
-		const { 
-            state: {
-                user: {
-                    _id
-                },
-                id
-            }
-        } = ctx
-
-		try{
-            await Report.findByIdAndUpdate(id, { $set: {  active: false, deletedAt: new Date() } })            
-		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
-			ctx.status = 500
-			return ctx.body = {
-				success: false,
-				message: `Internal error`
-			};
-		}
-		
-        return ctx.body = {
-            success: true,
-            message: 'Report successfully deleted'
-        }
-	}
 };

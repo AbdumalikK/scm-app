@@ -8,8 +8,6 @@ const router = new Router({ prefix: '/settings' })
 router
     .param('id', checkId())
     
-    .get('/', checkUser(), settingsController)
-    .post('/', checkUser(), settingsController)
-    .delete('/:id', checkUser(), settingsController)
+    .get('/archive', checkUser(), settingsController.getArchives)
 
 export default router.routes()
