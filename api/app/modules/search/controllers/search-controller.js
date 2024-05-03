@@ -27,19 +27,20 @@ export default {
 
     let posts = null
 
+    const startIndex = page === 1 ? 0 : (page - 1) * limit;
+    const endIndex = page * limit;
+
+    if (startIndex > 0) {
+      result.previous = {
+          page: page - 1,
+          limit: limit
+      };
+    }
+
     switch(type){
       case 1: {
-        const startIndex = page === 1 ? 0 : (page - 1) * limit;
-        const endIndex = page * limit;
         result.totalPosts = await Post.countDocuments({ tags: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()
 
-
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
-        }
         if (endIndex < await Post.countDocuments({ tags: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()) {
             result.next = {
                 page: page + 1,
@@ -63,17 +64,8 @@ export default {
         break
       }
       case 2: {
-        const startIndex = page === 1 ? 0 : (page - 1) * limit;
-        const endIndex = page * limit;
         result.totalPosts = await User.countDocuments({ username: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()
 
-
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
-        }
         if (endIndex < await User.countDocuments({ username: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()) {
             result.next = {
                 page: page + 1,
@@ -104,7 +96,6 @@ export default {
         };
       }
     }
-        
 		
     return ctx.body = {
       success: true,
