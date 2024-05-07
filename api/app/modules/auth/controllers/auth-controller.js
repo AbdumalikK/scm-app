@@ -22,8 +22,9 @@ export default {
 					type = null,
 					phone = null,
 					email = null,
-
-					username = null
+					password = null,
+					username = null,
+					refferal = null
 				}
 			}
 		} = ctx
