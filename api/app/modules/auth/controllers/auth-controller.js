@@ -58,7 +58,7 @@ export default {
 						ctx.status = 400
 						return ctx.body = {
 							success: false,
-							message: `User with phone=${userData.phone} already exists`
+							message: `User with phone=${phone} already exists`
 						};
 					}
 		
@@ -89,13 +89,13 @@ export default {
 				}
 
 				try{
-					user = await User.findOne({ email: userData.email })
+					user = await User.findOne({ email })
 		
 					if(user){
 						ctx.status = 400
 						return ctx.body = {
 							success: false,
-							message: `User with email=${userData.email} already exists`
+							message: `User with email=${email} already exists`
 						};
 					}
 		
