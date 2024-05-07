@@ -10,4 +10,9 @@ router
     
     .get('/archive', checkUser(), settingsController.getArchives)
 
+    .get('/privacy', checkUser(), settingsController.getPrivacy)
+    .patch('/privacy', checkUser(), settingsController.updatePrivacy)
+
+    .patch('/account/type', checkUser(), settingsController)
+
 export default router.routes()

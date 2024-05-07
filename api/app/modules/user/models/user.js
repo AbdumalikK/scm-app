@@ -58,6 +58,10 @@ const UserSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false
 	},
+	business: {
+		type: Boolean,
+		default: false
+	},
 	deletedAt: {
 		type: Date,
 		default: null
@@ -70,7 +74,7 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.statics.createFields = [ 
 	'firstName', 'lastName', 'username', 'refferal', 'description',
-	'password', 'role', 'phone', 'email', 'avaUri', 'private'
+	'password', 'role', 'phone', 'email', 'avaUri', 'private', 'business'
 ];
 
 UserSchema.pre('save', function(next){

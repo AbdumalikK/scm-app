@@ -6,6 +6,7 @@ import { client } from '../../../server'
 import { SIGNUP_PAYLOAD, FORGOT_PASSWORD_PAYLOAD } from '../constants'
 import { SIGNUP_TYPE_PHONE, SIGNUP_TYPE_EMAIL } from '../constants/types'
 import { User } from '../../user/models'
+import { Privacy } from '../../privacy/models'
 import { SMSService } from '../../../services/sms'
 import issueTokenPair from '../../../helpers/issueTokenPair'
 import jwtService from '../../../services/jwt'
@@ -35,7 +36,7 @@ export default {
 			};
 		}
 
-		let auth = {}, to = null
+		let auth = {}, user = null, to = null
 
 		switch(type){
 			case SIGNUP_TYPE_PHONE: {
@@ -51,7 +52,7 @@ export default {
 				}
 
 				try{
-					const user = await User.findOne({ phone })
+					user = await User.findOne({ phone })
 		
 					if(user){
 						ctx.status = 400
@@ -61,7 +62,7 @@ export default {
 						};
 					}
 		
-					await User.create({ phone, password, username, refferal })
+					user = await User.create({ phone, password, username, refferal })
 				}catch(ex){
 					ctx.status = 500
 					return ctx.body = {
@@ -88,7 +89,7 @@ export default {
 				}
 
 				try{
-					const user = await User.findOne({ email: userData.email })
+					user = await User.findOne({ email: userData.email })
 		
 					if(user){
 						ctx.status = 400
@@ -98,7 +99,7 @@ export default {
 						};
 					}
 		
-					await User.create({ email, password, username, refferal })
+					user = await User.create({ email, password, username, refferal })
 				}catch(ex){
 					ctx.status = 500
 					return ctx.body = {
@@ -123,6 +124,8 @@ export default {
 
 		// check last otp date, date > 2 min then ok else error 
 		try{
+			await Privacy.create({ creatorId: user._id })
+
 			const lastOtpTraffic = await OtpTraffic.findOne({ to }).sort({ createdAt: -1 })
 
 			let date = new Date()

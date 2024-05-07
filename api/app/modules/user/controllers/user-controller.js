@@ -33,7 +33,7 @@ export default {
 
             user['posts'] = posts
 
-            user['reels'] = await Video.countDocuments({ creatorId: _id, active: true }).exec()            
+            user['reels'] = await Video.countDocuments({ creatorId: _id, active: true }).exec() 
 		}catch(ex){
 			logger.error(`Error. ${ex.status} ${ex.message}`)
 			ctx.status = 400

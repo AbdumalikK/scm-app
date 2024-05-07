@@ -1,14 +1,10 @@
+import { User } from '../../user/models'
+import { Privacy } from '../../privacy/models'
 import { Post } from '../../post/models'
-
-import logger from '../../../utils/logs/logger'
-
 
 export default {
     async getArchives(ctx){
 		const { 
-            request: {
-                query
-            },
             state: {
                 user: {
                     _id
@@ -16,44 +12,10 @@ export default {
             }
         } = ctx
 
-        const page = parseInt(query.page) || 1
-        const limit = parseInt(query.limit) || 30
-        const result = {}
-
-        const select = {
-            __v: 0,
-            deletedAt: 0,
-            active: 0
-        }
-
-
-        let posts = null
-
-        const totalPosts = await Post.countDocuments({ creatorId: _id, active: false, deletedAt: { $eq: null } }).exec();
-        const startIndex = page === 1 ? 0 : (page - 1) * limit;
-        const endIndex = page * limit
-        result.totalPosts = totalPosts;
-
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
-        }
-        if (endIndex < (await Post.countDocuments({ creatorId: _id, active: false, deletedAt: { $eq: null } }).exec())) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
-        }
+        let archives = null
 
 		try{
-            posts = await Post
-                .find({ creatorId: _id, active: false, deletedAt: { $eq: null } })
-                .select(select)
-                .sort({ createdAt: -1 })
-                .skip(startIndex)
-                .limit(limit)
+            archives = await Post.find({ creatorId: _id, active: false, deletedAt: { $eq: null } })
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
@@ -65,9 +27,150 @@ export default {
         return ctx.body = {
             success: true,
             message: {
-                posts,
-                pagination: result
+                archives
             }
         }
 	},
+
+    async getPrivacy(ctx){
+		const { 
+            state: {
+                user: {
+                    _id
+                }
+            }
+        } = ctx
+
+        let user = null
+
+		try{
+            user = await User.aggregate([
+                { $match: { _id, active: true, deletedAt: { $eq: null }  } },
+                { $project: { __v: 0 } },
+                {
+                    $lookup: {
+                    from: 'privacies',
+                    as: 'privacy',
+                    pipeline: [
+                        {
+                        $match: {
+                            $expr: {
+                            $and: [{ $eq: ['$creatorId', _id] }]
+                            },
+                        }
+                        },
+                        { $project: { __v: 0 } }
+                    ]
+                    }
+                },
+            ])
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: {
+                user
+            }
+        }
+	},
+
+    async updatePrivacy(ctx){
+		const { 
+            request: { 
+                body
+            },
+            state: {
+                user: {
+                    _id
+                },
+                id
+            }
+        } = ctx
+
+        let privacy = nullW
+
+        const data = pick(body, Privacy.createFields);
+
+		try{
+            privacy = await Privacy.findOneAndUpdate({ _id: id, creatorId: _id }, { $set: data }, { new: true }).select({ __v: 0, deletedAt: 0 })
+
+            if(!privacy){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Privacy with id=${id} does not belong to user with id=${_id}`
+                };
+            }
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `${ex.message}`
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: {
+                privacy
+            }
+        }
+	},
+
+    async updateAccountType(ctx){
+		const { 
+            state: {
+                user: {
+                    _id
+                }
+            }
+        } = ctx
+
+        let user = null
+
+        // To Do: Account type logic
+
+		try{
+            user = await User.aggregate([
+                { $match: { _id, active: true, deletedAt: { $eq: null }  } },
+                { $project: { __v: 0 } },
+                {
+                    $lookup: {
+                    from: 'privacies',
+                    as: 'privacy',
+                    pipeline: [
+                        {
+                        $match: {
+                            $expr: {
+                            $and: [{ $eq: ['$creatorId', _id] }]
+                            },
+                        }
+                        },
+                        { $project: { __v: 0 } }
+                    ]
+                    }
+                },
+            ])
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: {
+                user
+            }
+        }
+	},
+
 };
