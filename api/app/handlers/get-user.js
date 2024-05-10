@@ -16,7 +16,8 @@ export default async (ctx) => {
 			ctx.status = 401
 			return ctx.body = {
 				sucess: false,
-				message: ERRORS['Unauthorized']
+				message: ERRORS['Unauthorized'],
+				data: null
 			}
 		}
 
@@ -28,7 +29,8 @@ export default async (ctx) => {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: ERRORS[ex.name]
+				message: ERRORS[ex.name],
+				data: null
 			}
 		}
 
@@ -36,7 +38,8 @@ export default async (ctx) => {
 			ctx.status = 401
 			return ctx.body = {
 				success: false,
-				message: ERRORS['Unauthorized']
+				message: ERRORS['Unauthorized'],
+				data: null
 			}
 		}
 	}

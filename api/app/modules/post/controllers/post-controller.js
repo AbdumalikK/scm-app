@@ -22,13 +22,15 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post`,
+            data: {
                 post
             }
         }
@@ -52,31 +54,30 @@ export default {
 
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 30;
-        const sort = query.sort
-        const result = {};
+        const paginationMetaData = {}
 
         const select = {
             __v: 0,
             deletedAt: 0,
             active: 0
-        };
+        }
 
-        const totalPosts = await Post.countDocuments({ active: true, deletedAt: { $eq: null } }).exec();
+        const total = await Post.countDocuments({ active: true, deletedAt: { $eq: null } }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
-        result.totalPosts = totalPosts;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
 
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
         }
-        if (endIndex < (await Post.countDocuments({ active: true, deletedAt: { $eq: null } }).exec())) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
         }
 
 		try{
@@ -90,16 +91,18 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
-                posts,
-                pagination: result
-            }
+            message: `Posts`,
+            data: {
+                posts
+            },
+            paginationMetaData
         }
 	},
 
@@ -133,13 +136,15 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`
+				message: `${ex.message}`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post added`,
+            data: {
                 post
             }
         }
@@ -173,20 +178,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post updated`,
+            data: {
                 post
             }
         }
@@ -205,13 +213,17 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: 'Post successfully deleted'
+            message: 'Post successfully deleted',
+            data: {
+                postId
+            }
         }
 	},
 
@@ -235,7 +247,8 @@ export default {
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `Payload not passed`
+                message: `Payload not passed`,
+                data: null
             };
         }
 
@@ -254,20 +267,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment added`,
+            data: {
                 post
             }
         }
@@ -293,7 +309,8 @@ export default {
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `Payload not passed`
+                message: `Payload not passed`,
+                data: null
             };
         }
 
@@ -306,20 +323,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment updated`,
+            data: {
                 post
             }
         }
@@ -358,20 +378,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${postId} & creatorId=${_id} & commentId=${commentId} not found`
+                    message: `Post with id=${postId} & creatorId=${_id} & commentId=${commentId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment deleted`,
+            data: {
                 post
             }
         }
@@ -416,7 +439,8 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Like already exists`
+                    message: `Like already exists`,
+                    data: null
                 };
             }
 
@@ -426,20 +450,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment like added`,
+            data: {
                 post
             }
         }
@@ -498,7 +525,8 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
@@ -506,13 +534,15 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment like deleted`,
+            data: {
                 post
             }
         }
@@ -538,7 +568,8 @@ export default {
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `Payload not passed`
+                message: `Payload not passed`,
+                data: null
             };
         }
 
@@ -580,20 +611,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment reply added`,
+            data: {
                 post
             }
         }
@@ -620,7 +654,8 @@ export default {
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `Payload not passed`
+                message: `Payload not passed`,
+                data: null
             };
         }
 
@@ -659,20 +694,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment reply updated`,
+            data: {
                 post
             }
         }
@@ -731,20 +769,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${postId} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`
+                    message: `Post with id=${postId} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment reply deleted`,
+            data: {
                 post
             }
         }
@@ -795,7 +836,8 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Like already exists`
+                    message: `Like already exists`,
+                    data: null
                 };
             }
 
@@ -827,20 +869,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment reply like added`,
+            data: {
                 post
             }
         }
@@ -908,7 +953,8 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`
+                    message: `Post with id=${_id} & creatorId=${_id} & commentId=${commentId} & replyId=${replyId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
@@ -916,13 +962,15 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Post comment reply like deleted`,
+            data: {
                 post
             }
         }

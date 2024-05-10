@@ -115,14 +115,16 @@ router
             ctx.status = 500
             return ctx.body = {
                 success: false,
-                message: ex.message
+                message: ex.message,
+                data: null
             }
         }
         
 
         return ctx.body = {
             success: true,
-            message: {
+            message: `Videos uploaded`,
+            data: {
                 videos
             }
         }
@@ -155,13 +157,15 @@ router
             ctx.status = 500
             return ctx.body = {
                 success: false,
-                message: ex.message
+                message: ex.message,
+                data: null
             }
         }
 
         return ctx.body = {
             success: true,
-            message: {
+            message: `Images uploaded`,
+            data: {
                 images
             }
         }

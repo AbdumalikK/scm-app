@@ -39,13 +39,15 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `User`,
+            data: {
                 user
             }
         }
@@ -68,7 +70,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `User with id=${_id} does not belong to user with id=${id}`
+				message: `User with id=${_id} does not belong to user with id=${id}`,
+                data: null
 			};
         }
 
@@ -89,13 +92,15 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `User updated`,
+            data: {
                 user
             }
         }
@@ -117,13 +122,17 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: `User successfully deleted`
+            message: `User successfully deleted`,
+            data: {
+                userId: _id
+            }
         }
 	}
 };

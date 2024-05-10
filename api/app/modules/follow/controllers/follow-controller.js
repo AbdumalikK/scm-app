@@ -24,31 +24,30 @@ export default {
 
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 30;
-        const sort = query.sort
-        const result = {};
+        const paginationMetaData = {}
 
         const select = {
             __v: 0,
             deletedAt: 0,
             active: 0
-        };
+        }
 
-        const totalPosts = await Following.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec();
+        const total = await Following.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
-        result.totalPosts = totalPosts;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
 
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
         }
-        if (endIndex < (await Following.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec())) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
         }
 
 		try{
@@ -62,16 +61,18 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Followings`,
+            data: {
                 followings,
-                pagination: result
-            }
+            },
+            paginationMetaData
         }
 	},
 
@@ -93,7 +94,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Validation error`
+				message: `Validation error`,
+                data: null
 			};
         }
 
@@ -106,7 +108,8 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `User with id=${userId} not found`
+                    message: `User with id=${userId} not found`,
+                    data: null
                 };
             }
 
@@ -119,13 +122,15 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`
+				message: `${ex.message}`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Following added`,
+            data: {
                 following
             }
         }
@@ -156,13 +161,17 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: 'Following successfully deleted'
+            message: 'Following successfully deleted',
+            data: {
+                followingId
+            }
         }
 	},
 
@@ -186,31 +195,30 @@ export default {
 
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 30;
-        const sort = query.sort
-        const result = {};
+        const paginationMetaData = {}
 
         const select = {
             __v: 0,
             deletedAt: 0,
             active: 0
-        };
+        }
 
-        const totalPosts = await Follower.countDocuments({ userId: _id, active: true, deletedAt: { $eq: null } }).exec();
+        const total = await Follower.countDocuments({ userId: _id, active: true, deletedAt: { $eq: null } }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
-        result.totalPosts = totalPosts;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
 
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
         }
-        if (endIndex < (await Follower.countDocuments({ userId: _id, active: true, deletedAt: { $eq: null } }).exec())) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
         }
 
 		try{
@@ -225,16 +233,18 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Followers`,
+            data: {
                 followers,
-                pagination: result
-            }
+            },
+            paginationMetaData
         }
 	},
 
@@ -318,13 +328,17 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: 'Follower successfully deleted'
+            message: 'Follower successfully deleted',
+            data: {
+                followerId
+            }
         }
 	},
 };

@@ -1,5 +1,3 @@
-import pick from 'lodash/pick'
-
 import { Story } from '../models'
 
 import logger from '../../../utils/logs/logger'
@@ -20,7 +18,7 @@ export default {
 
         const page = parseInt(query.page) || 1
         const limit = parseInt(query.limit) || 30
-        const result = {}
+        const paginationMetaData = {}
 
         const select = {
             __v: 0,
@@ -28,51 +26,29 @@ export default {
             active: 0
         }
 
+        const total = await Story.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec()
+        const startIndex = page === 1 ? 0 : (page - 1) * limit;
+        const endIndex = page * limit;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
+
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
+        }
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
+        }
 
         let stories = null
 
-        const totalPosts = await Story.countDocuments({ 
-            senderId: query.senderId,
-            recipientId: query.recipientId,
-            chatId: query.chatId,
-            creatorId: _id,
-            active: true, 
-            deletedAt: { $eq: null } 
-        }).exec();
-        const startIndex = page === 1 ? 0 : (page - 1) * limit;
-        const endIndex = page * limit;
-        result.totalPosts = totalPosts;
-
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
-        }
-        if (endIndex < (await Message.countDocuments({ 
-            senderId: query.senderId,
-            recipientId: query.recipientId,
-            chatId: query.chatId,
-            creatorId: _id,
-            active: true, 
-            deletedAt: { $eq: null } 
-         }).exec())) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
-        }
-
 		try{
-            audios = await Message
-                .find({
-                    senderId: query.senderId,
-                    recipientId: query.recipientId, 
-                    chatId: query.chatId,
-                    creatorId: _id,
-                    active: true, 
-                    deletedAt: { $eq: null }
-                 })
+            stories = await Story
+                .find({ creatorId: _id, active: true, deletedAt: { $eq: null } })
                 .select(select)
                 .sort({ createdAt: -1 })
                 .skip(startIndex)
@@ -81,16 +57,18 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
-                messages,
-                pagination: result
-            }
+            message: `Stories`,
+            data: {
+                stories
+            },
+            paginationMetaData
         }
 	},
     
@@ -120,13 +98,15 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`
+				message: `${ex.message}`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: { 
+            message: `Story added`,
+            data: {
                 story
             }
         }
@@ -149,13 +129,17 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: 'Story successfully deleted'
+            message: 'Story successfully deleted',
+            data: {
+                storyId: id
+            }
         }
 	},
 
@@ -193,13 +177,15 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`
+				message: `${ex.message}`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: { 
+            message: `Story like updated`,
+            data: {
                 story
             }
         }
@@ -238,20 +224,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Story with id=${id} & creatorId=${_id} & likeId=${likeId} not found`
+                    message: `Story with id=${id} & creatorId=${_id} & likeId=${likeId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Story like deleted`,
+            data: {
                 story
             }
         }

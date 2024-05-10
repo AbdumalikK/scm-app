@@ -1,10 +1,12 @@
-import { Report } from '../models'
+import pick from 'lodash/pick'
+
+import { Help } from '../models'
 
 import logger from '../../../utils/logs/logger'
 
 
 export default {
-    async getReports(ctx){
+    async getHelps(ctx){
 		const { 
             request: {
                 query
@@ -16,8 +18,11 @@ export default {
             }
         } = ctx
 
-        const page = parseInt(query.page) || 1
-        const limit = parseInt(query.limit) || 30
+
+        let helps = null
+
+        const page = parseInt(query.page) || 1;
+        const limit = parseInt(query.limit) || 30;
         const paginationMetaData = {}
 
         const select = {
@@ -26,7 +31,7 @@ export default {
             active: 0
         }
 
-        const total = await Report.countDocuments({ active: true, deletedAt: { $eq: null } }).exec()
+        const total = await Help.countDocuments({ active: true, deletedAt: { $eq: null } }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
         paginationMetaData.page = page
@@ -44,10 +49,8 @@ export default {
             paginationMetaData.hasNextPage = true
         }
 
-        let reports = null
-
 		try{
-            reports = await Report
+            helps = await Help
                 .find({ active: true, deletedAt: { $eq: null } })
                 .select(select)
                 .sort({ createdAt: -1 })
@@ -64,18 +67,21 @@ export default {
 		
         return ctx.body = {
             success: true,
-            message: `Reports`,
+            message: `Helps`,
             data: {
-                reports
+                helps
             },
             paginationMetaData
         }
 	},
-    
-    async addReport(ctx){
+
+    async addHelp(ctx){
 		const { 
             request: { 
-                body
+                body: {
+                    title = null,
+                    payload = null
+                }
             },
             state: {
                 user: {
@@ -84,32 +90,38 @@ export default {
             }
         } = ctx
 
-        const data = pick(body, Report.createFields);
-
-        let report = null
-
-		try{
-            report = await Report.create({ ...data, creatorId: _id })
-		}catch(ex){
-			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
-			ctx.status = 500
+        if(!userId){
+			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`,
+				message: `User id not passed`,
+                data: null
+			};
+        }
+
+        let help = null
+
+		try{
+			help = await Help.create({ creatorId: _id, title, payload })
+		}catch(ex){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
                 data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: `Report added`,
+            message: `Help added`,
             data: {
-                report
+                help
             }
         }
 	},
 
-    async deleteReport(ctx){
+    async deleteHelp(ctx){
 		const { 
             state: {
                 user: {
@@ -120,7 +132,7 @@ export default {
         } = ctx
 
 		try{
-            await Report.findByIdAndUpdate(id, { $set: {  active: false, deletedAt: new Date() } })            
+            await Help.findByIdAndUpdate(id, { $set: {  active: false, deletedAt: new Date() } })            
 		}catch(ex){
 			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
@@ -133,9 +145,9 @@ export default {
 		
         return ctx.body = {
             success: true,
-            message: 'Report successfully deleted',
+            message: 'Help successfully deleted',
             data: {
-                reportId: id
+                helpId: id
             }
         }
 	}

@@ -259,15 +259,9 @@ export default {
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 30;
         const search = query.search
-        const result = {};
+        const paginationMetaData = {}
 
-        const select = {
-            __v: 0,
-            deletedAt: 0
-        };
-
-
-        let chats = null, totalPosts = 0
+        let chats = null, total = 0
 
         try{
             const count = await Chat.aggregate([
@@ -283,7 +277,7 @@ export default {
                 { $count: "chats" }
               ])
 
-              totalPosts = count[0].chats
+              total = count[0].chats
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
@@ -292,27 +286,27 @@ export default {
 			};
 		}
 
-        const startIndex = page === 1 ? 0 : (page - 1) * limit;
-        const endIndex = page * limit;
-        result.totalPosts = totalPosts;
+        const startIndex = page === 1 ? 0 : (page - 1) * limit
+        const endIndex = page * limit
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
 
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
         }
-        if (endIndex < totalPosts) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
         }
 
 		try{
             chats = await Chat.aggregate([
                 { $match: { senderId: _id, creatorId: _id, active: true, deletedAt: { $eq: null }  } },
-                { $project: { __v: 0 } },
+                { $project: { __v: 0, deletedAt: 0 } },
                 {
                   $lookup: {
                     from: 'users',
@@ -344,16 +338,18 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Search a chat`,
+            data: {
                 chats,
-                pagination: result
-            }
+            },
+            paginationMetaData
         }
 	},
 };

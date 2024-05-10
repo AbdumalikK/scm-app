@@ -1,10 +1,5 @@
-import pick from 'lodash/pick'
-
 import { Post } from '../../post/models'
 import { User } from '../../user/models'
-
-import logger from '../../../utils/logs/logger'
-
 
 export default {
     async search(ctx){
@@ -23,29 +18,29 @@ export default {
     const limit = parseInt(query.limit) || 30;
     const search = query.search
     const type = +query.type
-    const result = {};
-
-    let posts = null
+    const paginationMetaData = {}
 
     const startIndex = page === 1 ? 0 : (page - 1) * limit;
     const endIndex = page * limit;
+    paginationMetaData.page = page
+    paginationMetaData.limit = limit
 
-    if (startIndex > 0) {
-      result.previous = {
-          page: page - 1,
-          limit: limit
-      };
+    if (startIndex > 0){
+      paginationMetaData.prevPage = page - 1
+      paginationMetaData.hasPrevPage = true
     }
+
+    let posts = null
 
     switch(type){
       case 1: {
-        result.totalPosts = await Post.countDocuments({ tags: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()
+        const total = await Post.countDocuments({ tags: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.total = total
 
-        if (endIndex < await Post.countDocuments({ tags: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
+        if (endIndex < total) {
+          paginationMetaData.nextPage = page + 1
+          paginationMetaData.hasNextPage = true
         }
 
         try{
@@ -58,19 +53,20 @@ export default {
           ctx.status = 500
           return ctx.body = {
               success: false,
-              message: `Internal error`
+              message: `Internal error`,
+              data: null
           };
         }
         break
       }
       case 2: {
-        result.totalPosts = await User.countDocuments({ username: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()
+        const total = await User.countDocuments({ username: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.total = total
 
-        if (endIndex < await User.countDocuments({ username: { $regex: search, $options: 'i' }, active: true, deletedAt: { $eq: null }  }).exec()) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
+        if (endIndex < total) {
+          paginationMetaData.nextPage = page + 1
+          paginationMetaData.hasNextPage = true
         }
 
         try{
@@ -83,7 +79,8 @@ export default {
           ctx.status = 500
           return ctx.body = {
               success: false,
-              message: `Internal error`
+              message: `Internal error`,
+              data: null
           };
         }
         break
@@ -92,17 +89,19 @@ export default {
         ctx.status = 400
         return ctx.body = {
             success: false,
-            message: `Invalid value of type`
+            message: `Invalid value of type`,
+            data: null
         };
       }
     }
 		
     return ctx.body = {
       success: true,
-      message: {
-          posts,
-          pagination: result
-      }
+      message: `Posts`,
+      data: {
+        posts
+      },
+      paginationMetaData
     }
 	},
 };

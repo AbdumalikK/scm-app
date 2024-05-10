@@ -33,7 +33,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Type is null`
+				message: `Type is null`,
+				data: null
 			};
 		}
 
@@ -48,7 +49,8 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `Phone validation error`
+						message: `Phone validation error`,
+						data: null
 					};
 				}
 
@@ -59,7 +61,8 @@ export default {
 						ctx.status = 400
 						return ctx.body = {
 							success: false,
-							message: `User with phone=${phone} already exists`
+							message: `User with phone=${phone} already exists`,
+							data: null
 						};
 					}
 		
@@ -68,7 +71,8 @@ export default {
 					ctx.status = 500
 					return ctx.body = {
 						success: false,
-						message: `Internal error. ${ex.status} ${ex.message}`
+						message: `Internal error. ${ex.status} ${ex.message}`,
+						data: null
 					};
 				}
 
@@ -85,7 +89,8 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `Email validation error`
+						message: `Email validation error`,
+						data: null
 					};
 				}
 
@@ -96,7 +101,8 @@ export default {
 						ctx.status = 400
 						return ctx.body = {
 							success: false,
-							message: `User with email=${email} already exists`
+							message: `User with email=${email} already exists`,
+							data: null
 						};
 					}
 		
@@ -105,7 +111,8 @@ export default {
 					ctx.status = 500
 					return ctx.body = {
 						success: false,
-						message: `Internal error. ${ex.status} ${ex.message}`
+						message: `Internal error. ${ex.status} ${ex.message}`,
+						data: null
 					};
 				}
 
@@ -118,7 +125,8 @@ export default {
 				ctx.status = 400
 				return ctx.body = {
 					success: false,
-					message: `Invalid value of param type`
+					message: `Invalid value of param type`,
+					data: null
 				};
 			}
 		}
@@ -141,7 +149,8 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Try again after ${min}:${(sec < 10 ? '0' : '') + sec}`
+                    message: `Try again after ${min}:${(sec < 10 ? '0' : '') + sec}`,
+					data: null
                     
                 }
 			}
@@ -149,7 +158,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 		
@@ -161,7 +171,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
@@ -177,7 +188,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
@@ -187,14 +199,16 @@ export default {
 				ctx.status = 201
 				return ctx.body = {
 					success: true,
-					message: `Sms sent successfully`
+					message: `Sms sent successfully`,
+					data: null
 				}
 			})
 			.catch(async error => {
 				ctx.status = 500
 				return ctx.body = {
 					success: false,
-					message: `Failed to send sms. ${error.message}`
+					message: `Failed to send sms. ${error.message}`,
+					data: null
 				}
 			})
 		}else{
@@ -207,13 +221,18 @@ export default {
 				ctx.status = 201
 				return ctx.body = {
 					success: true,
-					message: `Email sent successfully`
+					message: `Email sent successfully`,
+					data: {
+						user,
+						messageId: info.messageId
+					}
 				}
 			} catch (error) {
 				ctx.status = 500
 				return ctx.body = {
 					success: false,
-					message: `Failed to send email. ${error}`
+					message: `Failed to send email. ${error}`,
+					data: null
 				}
 			}
 		}
@@ -232,7 +251,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: ERRORS['BadRequest']
+				message: ERRORS['BadRequest'],
+				data: null
 			}
 		}
 
@@ -246,7 +266,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
@@ -254,7 +275,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Otp not found`
+				message: `Otp not found`,
+				data: null
 			}
 		}
 
@@ -274,7 +296,8 @@ export default {
 			ctx.status = 404
 			return ctx.body = {
 				success: false,
-				message: `User not found`
+				message: `User not found`,
+				data: null
 			}
 		}
 
@@ -283,17 +306,19 @@ export default {
 
 			ctx.body = {
 				success: true,
-				message: {
+				message: `User successfully signed in`,
+				data: {
 					user,
 					token,
-					refreshToken
+					refreshToken,
 				}
 			}
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+				data: null
 			}
 		}
 	},
@@ -312,7 +337,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Username not passed`
+				message: `Username not passed`,
+				data: null
 			}
 		}
 
@@ -320,7 +346,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Password not passed`
+				message: `Password not passed`,
+				data: null
 			}
 		}
 
@@ -341,7 +368,8 @@ export default {
 			ctx.status = 404
 			return ctx.body = {
 				success: false,
-				message: `User not found`
+				message: `User not found`,
+				data: null
 			}
 		}
 
@@ -349,7 +377,8 @@ export default {
 			ctx.status = 403
 			return ctx.body = {
 				success: false, 
-				message: 'Invalid password' 
+				message: 'Invalid password',
+				data: null
 			}
 		}
 
@@ -360,7 +389,8 @@ export default {
 
 			ctx.body = {
 				success: true,
-				message: {
+				message: `User successfully signed in`,
+				data: {
 					user,
 					token,
 					refreshToken
@@ -370,7 +400,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+				data: null
 			}
 		}
 	},
@@ -390,7 +421,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Type is null`
+				message: `Type is null`,
+				data: null
 			};
 		}
 
@@ -405,7 +437,8 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `Phone validation error`
+						message: `Phone validation error`,
+						data: null
 					};
 				}
 
@@ -415,7 +448,8 @@ export default {
 					ctx.status = 404
 					return ctx.body = {
 						success: false,
-						message: `User not found`
+						message: `User not found`,
+						data: null
 					}
 				}
 
@@ -423,7 +457,8 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `User with phone=${phone} not found`
+						message: `User with phone=${phone} not found`,
+						data: null
 					};
 				}
 
@@ -439,7 +474,8 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `Email validation error`
+						message: `Email validation error`,
+						data: null
 					};
 				}
 		
@@ -449,7 +485,8 @@ export default {
 					ctx.status = 404
 					return ctx.body = {
 						success: false,
-						message: `User not found`
+						message: `User not found`,
+						data: null
 					}
 				}
 
@@ -458,7 +495,8 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `User with email=${email} not found`
+						message: `User with email=${email} not found`,
+						data: null
 					};
 				}
 
@@ -470,7 +508,8 @@ export default {
 				ctx.status = 400
 				return ctx.body = {
 					success: false,
-					message: `Invalid value of param type`
+					message: `Invalid value of param type`,
+					data: null
 				};
 			}
 		}
@@ -486,7 +525,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
@@ -498,14 +538,16 @@ export default {
 				ctx.status = 201
 				return ctx.body = {
 					success: true,
-					message: `Sms sent successfully`
+					message: `Sms sent successfully`,
+					data: null
 				}
 			})
 			.catch(async error => {
 				ctx.status = 500
 				return ctx.body = {
 					success: false,
-					message: `Failed to send sms. ${error}`
+					message: `Failed to send sms. ${error}`,
+					data: null
 				}
 			})
 		}else{
@@ -516,13 +558,17 @@ export default {
 				ctx.status = 201
 				return ctx.body = {
 					success: true,
-					message: `Email sent successfully`
+					message: `Email sent successfully`,
+					data: {
+						messageId: info.messageId
+					}
 				}
 			} catch (error) {
 				ctx.status = 500
 				return ctx.body = {
 					success: false,
-					message: `Failed to send email. ${error}`
+					message: `Failed to send email. ${error}`,
+					data: null
 				}
 			}
 		}
@@ -543,7 +589,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Type is null`
+				message: `Type is null`,
+				data: null
 			};
 		}
 
@@ -551,7 +598,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Type is null`
+				message: `Type is null`,
+				data: null
 			};
 		}
 
@@ -565,7 +613,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
@@ -573,7 +622,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Otp not found`
+				message: `Otp not found`,
+				data: null
 			}
 		}
 
@@ -585,7 +635,8 @@ export default {
 			ctx.status = 404
 			return ctx.body = {
 				success: false,
-				message: `User not found`
+				message: `User not found`,
+				data: null
 			}
 		}
 
@@ -593,7 +644,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `User with ${type == SIGNUP_TYPE_PHONE ? `phone=${otpExist.phone}` : `email=${otpExist.email}`} not found`
+				message: `User with ${type == SIGNUP_TYPE_PHONE ? `phone=${otpExist.phone}` : `email=${otpExist.email}`} not found`,
+				data: null
 			};
 		}
 
@@ -602,7 +654,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `User with _id=${_id} does not belong to user with _id=${user._id}`
+				message: `User with _id=${_id} does not belong to user with _id=${user._id}`,
+				data: null
 			};
 		}
 		
@@ -611,7 +664,10 @@ export default {
 
 		ctx.body = {
 			success: true,
-			message: `Password successfully changed`
+			message: `Password successfully changed`,
+			data: {
+				user
+			}
 		}
 
 	}

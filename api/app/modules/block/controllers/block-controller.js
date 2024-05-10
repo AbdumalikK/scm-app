@@ -22,32 +22,32 @@ export default {
 
         let blockedUsers = null
 
-        const page = parseInt(query.page) || 1;
-        const limit = parseInt(query.limit) || 30;
-        const result = {};
+        const page = parseInt(query.page) || 1
+        const limit = parseInt(query.limit) || 30
+        const paginationMetaData = {}
 
         const select = {
             __v: 0,
             deletedAt: 0,
             active: 0
-        };
+        }
 
-        const totalPosts = await Block.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec()
+        const total = await Block.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
-        result.totalPosts = totalPosts;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
 
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
         }
-        if (endIndex < (await Block.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec())) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
         }
 
 		try{
@@ -61,16 +61,18 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+				data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Blocked users`,
+            data: {
                 blockedUsers,
-                pagination: result
-            }
+            },
+            paginationMetaData
         }
 	},
 
@@ -92,7 +94,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `User id not passed`
+				message: `User id not passed`,
+				data: null
 			};
         }
 
@@ -105,7 +108,8 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `User with id=${userId} already blocked`
+                    message: `User with id=${userId} already blocked`,
+                    data: null
                 };
             }
 
@@ -114,13 +118,15 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+				data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `User blocked`,
+            data: {
                 blockedUser
             }
         }
@@ -144,7 +150,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `UserId not passed`
+				message: `UserId not passed`,
+				data: null
 			};
         }
 
@@ -170,20 +177,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Blocked user with userId=${userId} not found`
+                    message: `Blocked user with userId=${userId} not found`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+				data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `User unblocked`,
+            data: {
                 unblockedUser
             }
         }

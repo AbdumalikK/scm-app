@@ -45,48 +45,40 @@ export default {
 
         const page = parseInt(query.page) || 1;
         const limit = parseInt(query.limit) || 30;
-        const result = {};
+        const paginationMetaData = {}
 
         const select = {
             __v: 0,
             deletedAt: 0,
             active: 0
-        };
+        }
 
-
-        let messages = null
-
-        const totalPosts = await Message.countDocuments({ 
+        const total = await Message.countDocuments({ 
             senderId: query.senderId,
             recipientId: query.recipientId,
             chatId: query.chatId,
             creatorId: _id,
             active: true, 
             deletedAt: { $eq: null } 
-        }).exec();
+        }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
-        result.totalPosts = totalPosts;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
 
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            };
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
         }
-        if (endIndex < (await Message.countDocuments({ 
-            senderId: query.senderId,
-            recipientId: query.recipientId,
-            chatId: query.chatId,
-            creatorId: _id,
-            active: true, 
-            deletedAt: { $eq: null } 
-         }).exec())) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            };
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
         }
+
+        let messages = null
 
 		try{
             messages = await Message
@@ -106,16 +98,18 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Messages`,
+            data: {
                 messages,
-                pagination: result
-            }
+            },
+            paginationMetaData
         }
 	},
     
@@ -145,13 +139,15 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`
+				message: `${ex.message}`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Message added`,
+            data: {
                 message
             }
         }
@@ -181,20 +177,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Message with id=${id} does not belong to user with id=${_id}`
+                    message: `Message with id=${id} does not belong to user with id=${_id}`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`
+				message: `${ex.message}`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Message updated`,
+            data: {
                 message
             }
         }
@@ -225,13 +224,17 @@ export default {
             ctx.status = 500
             return ctx.body = {
                 success: false,
-                message: `Internal error`
+                message: `Internal error`,
+                data: null
             };
         }
         
         return ctx.body = {
             success: true,
-            message: 'Message successfully deleted'
+            message: 'Message successfully deleted',
+            data: {
+                messageId: id
+            }
         }
     },
 };
