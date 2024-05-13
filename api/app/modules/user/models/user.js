@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema({
 		trim: true,
 		default: null
 	},
-	description: {
+	bio: {
 		type: String,
 		default: null
 	},
@@ -62,6 +62,28 @@ const UserSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false
 	},
+	gender: {
+		type: String,
+		default: null
+	},
+	area: {
+		city: {
+			type: String,
+			default: null 
+		},
+		state: {
+			type: String,
+			default: null
+		},
+		country: {
+			type: String,
+			default: null
+		}
+	},
+	interests: [{
+		type: String,
+		default: null
+	}],
 	deletedAt: {
 		type: Date,
 		default: null
@@ -74,7 +96,8 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.statics.createFields = [ 
 	'firstName', 'lastName', 'username', 'refferal', 'description',
-	'password', 'role', 'phone', 'email', 'avaUri', 'private', 'business'
+	'password', 'role', 'phone', 'email', 'avaUri', 'private', 'business',
+	'gender', 'area', 'interests'
 ];
 
 UserSchema.pre('save', function(next){

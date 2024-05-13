@@ -55,6 +55,7 @@ router
 	.post('/auth/signup', check(), authController.signup)
 	.post('/auth/signup/confirm', check(), authController.signupConfirm)
 	.post('/auth/signin', check(), authController.signin)
+	.post('/auth/signin/confirm', check(), authController.signinConfirm)
 
 
 	// google auth
@@ -95,6 +96,7 @@ router
 	})
 
 	.post('/auth/forgot-password', check(), authController.forgotPassword)
+	.post('/auth/forgot-password/confirm', check(), authController.forgotPasswordConfirm)
 	.post('/auth/reset-password', check(), authController.resetPassword)
 	.get('/logout', async (ctx) => {
 		ctx.logout();
