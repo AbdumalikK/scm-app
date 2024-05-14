@@ -81,7 +81,7 @@ export default {
 		let user = {}
 
 		try{
-			user = await User.findByIdAndUpdate(_id, data).select({ 
+			user = await User.findByIdAndUpdate(_id, { $set: data }).select({ 
                 __v: 0,
                 acive: 0,
                 deletedAt: 0,
