@@ -361,6 +361,8 @@ export default {
 				}
 
 				let user = null
+
+				console.log('phone', phone)
 				try{
 					await User.findOne({ phone })
 				}catch(ex){
@@ -371,6 +373,8 @@ export default {
 						data: null
 					};
 				}
+
+				console.log('user', user)
 
 				if(!user){
 					ctx.status = 400
