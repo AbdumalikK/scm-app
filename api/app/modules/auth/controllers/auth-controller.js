@@ -360,6 +360,27 @@ export default {
 					};
 				}
 
+				let user = null
+				try{
+					await User.findOne({ phone })
+				}catch(ex){
+					ctx.status = 500
+					return ctx.body = {
+						success: false,
+						message: `Internal error. ${ex.status} ${ex.message}`,
+						data: null
+					};
+				}
+
+				if(!user){
+					ctx.status = 400
+					return ctx.body = {
+						success: false,
+						message: `User with phone=${phone} does not exist`,
+						data: null
+					};
+				}
+
 				const otp = randomatic('0', 4)
 
 				try{
