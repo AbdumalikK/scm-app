@@ -396,7 +396,9 @@ export default {
 						return ctx.body = {
 							success: true,
 							message: `Sms sent successfully`,
-							data: null
+							data: {
+								otp
+							}
 						}
 					})
 					.catch(async error => {

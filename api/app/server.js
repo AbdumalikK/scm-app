@@ -2,12 +2,11 @@ import async_redis from 'async-redis'
 import path from 'path'
 import fs from 'fs'
 import http from 'http'
+import socketIO from 'socket.io'
 
 import app from './app'
 import { PORT, REDIS_PORT, ERRORS, errors } from './config'
 import logger from './utils/logs/logger'
-
-const socketio = require('socket.io');
 
 // directories
 const imagesDir = path.resolve(path.join(process.cwd() + '/uploads/images'))
@@ -33,11 +32,10 @@ client.on('error', function(error) {
 client.set(Object.keys(errors)[0], JSON.stringify(ERRORS))
 
 
-// server
-const server = http.createServer(app.callback())
-
-// socket io
-const io = socketio(server)
+let server = http.createServer(app.callback()),
+    io = require('socket.io')(server, {
+		transports: ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling', 'polling']
+	});
 
 
 // const users = [];
@@ -69,8 +67,18 @@ const io = socketio(server)
 // const getUsersInRoom = (room) => users.filter((user) => user.room === room);
 
 
+// io.use(async (socket, next) => {
+// 	const {
+// 		handshake: {
+// 			query
+// 		}
+// 	} = socket;
+// 	console.log('query', query)
+// }).on('connection', (socket) => {
+// 	console.log('socket', socket)
+// });
 
-// io.on('connect', (socket) => {
+// io.on('connection', (socket) => {
 // 	socket.on('join', ({ name, room }, callback) => {
 // 	  const { error, user } = addUser({ id: socket.id, name, room });
   
