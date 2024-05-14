@@ -393,7 +393,7 @@ export default {
 				return SMSService(phone, SIGNUP_PAYLOAD(otp))	
 					.then(() => {
 						ctx.status = 201
-						ctx.set('x-remove-otp', otp)
+						ctx.set('x-remove-otp', otp) // need to be removed: -> dev purpose 	q
 						return ctx.body = {
 							success: true,
 							message: `Sms sent successfully`,
@@ -564,14 +564,12 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `User with _id=${otpExist._id} not found`,
+				message: `User with phone=${phone} not found`,
 				data: null
 			};
 		}
 		
 		try {
-			user = await User.findById(user._id).select(select)
-			
 			const { token, refreshToken } = await issueTokenPair(user.username, user)
 
 			ctx.body = {

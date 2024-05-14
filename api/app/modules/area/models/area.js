@@ -14,12 +14,14 @@ const AreaSchema = new mongoose.Schema({
     required: true
   },
   state: [{
-    type: String,
-    required: true
-  }],
-  city: [{
-    type: String,
-    required: true
+    name: {
+      type: String,
+      required: true
+    },
+    city: [{
+      type: String,
+      default: null
+    }]
   }],
   deletedAt: {
     type: Date,
