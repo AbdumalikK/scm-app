@@ -13,6 +13,8 @@ import story from './story'
 import saved from './saved'
 import report from './report'
 import search from './search'
+import area from './area'
+import interest from './interest'
 
 const router = new Router()
 
@@ -29,6 +31,8 @@ router.use(story)
 router.use(saved)
 router.use(report)
 router.use(search)
+router.use(area)
+router.use(interest)
 
 
 export default router.routes()

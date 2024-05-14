@@ -2,8 +2,8 @@ import { Post } from '../../post/models'
 import { User } from '../../user/models'
 
 export default {
-    async search(ctx){
-		const { 
+  async search(ctx){
+    const { 
         request: {
             query
         },

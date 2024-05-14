@@ -92,7 +92,7 @@ const UserSchema = new mongoose.Schema({
 		type: Boolean,
 		default: true
 	}
-}, { timestamps: true });
+}, { timestamps: true })
 
 UserSchema.statics.createFields = [ 
 	'firstName', 'lastName', 'username', 'refferal', 'description',
@@ -102,16 +102,16 @@ UserSchema.statics.createFields = [
 
 UserSchema.pre('save', function(next){
 	if (this.isModified('password')) {
-		const salt = bcrypt.genSaltSync(10);
+		const salt = bcrypt.genSaltSync(10)
 	
-		this.password = bcrypt.hashSync(this.password, salt);
+		this.password = bcrypt.hashSync(this.password, salt)
 	}
 	
-	next();
-});
+	next()
+})
 
 UserSchema.methods.comparePasswords = function(password){
-	return bcrypt.compareSync(password, this.password);
-};
+	return bcrypt.compareSync(password, this.password)
+}
 
-export default mongoose.model('user', UserSchema);
+export default mongoose.model('user', UserSchema)
