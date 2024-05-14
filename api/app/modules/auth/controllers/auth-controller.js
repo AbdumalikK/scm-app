@@ -393,12 +393,11 @@ export default {
 				return SMSService(phone, SIGNUP_PAYLOAD(otp))	
 					.then(() => {
 						ctx.status = 201
+						ctx.set('x-remove-otp', otp)
 						return ctx.body = {
 							success: true,
 							message: `Sms sent successfully`,
-							data: {
-								otp
-							}
+							data: null
 						}
 					})
 					.catch(async error => {
