@@ -32,6 +32,7 @@ export const init = () => {
   io.use((socket, next) => {
     console.log('socket id', socket.id)
     if (socket.request) {
+      console.log('request', socket.request)
       next();
     } else {
       next(new Error("invalid"));
@@ -39,7 +40,7 @@ export const init = () => {
   });
 
   io.on('connect', (socket) => {
-    socket.on('join', ({ name, room }, callback) => {
+    socket.on('join', ({ creatorId, userId }, callback) => {
       console.log(`name=${name}, room=${room}`)
       const { error, user } = addUser({ id: socket.id, name, room });
 

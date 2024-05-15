@@ -260,7 +260,7 @@ export default {
 
 		try{
 			otpExist = JSON.parse(await client.get(otp))
-			
+
 			await client.del(otp)
 		}catch(ex){
 			ctx.status = 500
@@ -301,6 +301,7 @@ export default {
 			}
 		}
 
+		console.log('otp exist', otpExist, ', user', user)
 		try {
 			const { token, refreshToken } = await issueTokenPair(otpExist.type, user)
 
@@ -317,7 +318,7 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`,
+				message: `Internal error. ${ex.status} ${ex.message}`,
 				data: null
 			}
 		}
