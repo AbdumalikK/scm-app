@@ -84,6 +84,10 @@ const UserSchema = new mongoose.Schema({
 		type: String,
 		default: null
 	}],
+	isOnboardingCompleted: {
+		type: Boolean,
+		default: false
+	},
 	deletedAt: {
 		type: Date,
 		default: null

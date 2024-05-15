@@ -2,7 +2,7 @@ import async_redis from 'async-redis'
 import path from 'path'
 import fs from 'fs'
 import http from 'http'
-import socketIO from 'socket.io'
+import IO from 'koa-socket-2'
 
 import app from './app'
 import { PORT, REDIS_PORT, ERRORS, errors } from './config'
@@ -32,6 +32,13 @@ client.on('error', function(error) {
 client.set(Object.keys(errors)[0], JSON.stringify(ERRORS))
 
 
+
+
+// socket io
+const io = new IO()
+io.attach(app);
+
+
 // server
 const server = http.createServer(app.callback())
 
@@ -43,10 +50,9 @@ server.listen(PORT, (err) => {
 
 
 
-// socket io
-const io = socketIO(server, {
-	origins: '*:*' 
-})
+
+
+
 
 const users = [];
 
@@ -79,6 +85,7 @@ const getUsersInRoom = (room) => users.filter((user) => user.room === room);
 
 
 io.on('connection', (socket) => {
+	console.log('socket', socket)
 	socket.on('join', ({ name, room }, callback) => {
 	  const { error, user } = addUser({ id: socket.id, name, room });
   
