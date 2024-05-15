@@ -315,6 +315,7 @@ export default {
 				}
 			}
 		}catch(ex){
+			consolo.log(ex)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
