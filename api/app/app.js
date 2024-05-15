@@ -34,14 +34,13 @@ app.use(async (ctx, next) => {
         :
         logger.info(`${method} ${originalUrl} - ${header['user-agent']} ${header.host}`)
 
-    
     await next()
+
 })
 
 app.use(serve(path.join(__dirname, '../')))
 
 app.use(modules);
-
 
 
 export default app;

@@ -260,9 +260,7 @@ export default {
 
 		try{
 			otpExist = JSON.parse(await client.get(otp))
-
-			print(otpExist)
-
+			
 			await client.del(otp)
 		}catch(ex){
 			ctx.status = 500

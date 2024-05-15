@@ -14,9 +14,6 @@ import { Video } from '../video/models'
 
 import { CHAT } from './constants'
 
-// import { init } from './socket'
-// init
-
 const random = (length = 10) => (Array(length).fill(null).map(() => Math.round(Math.random() * 16).toString(16)).join(''))
 
 // ----- post image -----

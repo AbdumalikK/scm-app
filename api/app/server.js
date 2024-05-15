@@ -2,9 +2,10 @@ import async_redis from 'async-redis'
 import path from 'path'
 import fs from 'fs'
 import http from 'http'
-import IO from 'koa-socket-2'
+import { Server } from 'socket.io'
 
 import app from './app'
+import { init } from './modules/chat/socket'
 import { PORT, REDIS_PORT, ERRORS, errors } from './config'
 import logger from './utils/logs/logger'
 
@@ -32,13 +33,6 @@ client.on('error', function(error) {
 client.set(Object.keys(errors)[0], JSON.stringify(ERRORS))
 
 
-
-
-// socket io
-const io = new IO()
-io.attach(app);
-
-
 // server
 const server = http.createServer(app.callback())
 
@@ -46,79 +40,28 @@ server.listen(PORT, (err) => {
 	if (err) logger.error(err);
 
 	console.log(`Listening at http://localhost:${PORT}`);
-});
+}); 
 
 
+// socket io
+const io = new Server(server, {
+    cors: {
+        origin: ['http://localhost:3001']
+    },
+	allowEIO3: true,
+    // credentials: false,
+    allowedHeaders: {
+        'Access-Control-Allow-Credentials': true,
+    },
+    // cors: {
+    //     origin: 'http://localhost:3001'
+    // },
+    // path: '/socket.io',
+    // transports: ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling', 'polling']
+})
 
-
-
-
-
-const users = [];
-
-const addUser = ({ id, name, room }) => {
-  name = name.trim().toLowerCase();
-  room = room.trim().toLowerCase();
-
-  const existingUser = users.find((user) => user.room === room && user.name === name);
-
-  if(!name || !room) return { error: 'Username and room are required.' };
-  if(existingUser) return { error: 'Username is taken.' };
-
-  const user = { id, name, room };
-
-  users.push(user);
-
-  return { user };
-}
-
-const removeUser = (id) => {
-  const index = users.findIndex((user) => user.id === id);
-
-  if(index !== -1) return users.splice(index, 1)[0];
-}
-
-const getUser = (id) => users.find((user) => user.id === id);
-
-const getUsersInRoom = (room) => users.filter((user) => user.room === room);
-
-
-
-io.on('connection', (socket) => {
-	console.log('socket', socket)
-	socket.on('join', ({ name, room }, callback) => {
-	  const { error, user } = addUser({ id: socket.id, name, room });
-  
-	  if(error) return callback(error);
-  
-	  socket.join(user.room);
-  
-	  socket.emit('message', { user: 'admin', text: `${user.name}, welcome to room ${user.room}.`});
-	  socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${user.name} has joined!` });
-  
-	  io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
-  
-	  callback();
-	});
-  
-	socket.on('sendMessage', (message, callback) => {
-	  const user = getUser(socket.id);
-  
-	  io.to(user.room).emit('message', { user: user.name, text: message });
-  
-	  callback();
-	});
-  
-	socket.on('disconnect', () => {
-	  const user = removeUser(socket.id);
-  
-	  if(user) {
-		io.to(user.room).emit('message', { user: 'Admin', text: `${user.name} has left.` });
-		io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room)});
-	  }
-	})
-});
-
+// chat socket
+init()
 
 
 export default server;
