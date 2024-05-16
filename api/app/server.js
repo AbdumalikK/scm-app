@@ -40,7 +40,7 @@ server.listen(PORT, (err) => {
 	if (err) logger.error(err);
 
 	console.log(`Listening at http://localhost:${PORT}`);
-}); 
+});
 
 
 // socket io
