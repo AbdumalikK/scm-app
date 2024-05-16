@@ -42,7 +42,6 @@ export const init = () => {
   io.on('connect', (socket) => {
     socket.on('join', ({ creatorId, userId }, callback) => {
       console.log(`creatorId=${creatorId}, userId=${userId}`)
-      console.log('')
       const { error, user } = addUser({ id: socket.id, name, room });
 
       if(error) return callback(error);
