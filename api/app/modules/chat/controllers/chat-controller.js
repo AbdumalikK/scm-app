@@ -75,12 +75,6 @@ export default {
         const limit = parseInt(query.limit) || 30;
         const result = {};
 
-        const select = {
-            __v: 0,
-            deletedAt: 0
-        };
-
-
         let chats = null
 
         const totalPosts = await Chat.countDocuments({ 

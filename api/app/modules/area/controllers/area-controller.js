@@ -78,8 +78,7 @@ export default {
                 body: {
                     country = null,
                     isoCode = null,
-                    state = null,
-                    city = null
+                    state = null
                 }
             },
             state: {
@@ -92,7 +91,7 @@ export default {
         let area = null
 
 		try{
-            area = await Area.create({ country, isoCode, state, city, creatorId: _id })
+            area = await Area.create({ country, isoCode, state, creatorId: _id })
 		}catch(ex){
 			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500

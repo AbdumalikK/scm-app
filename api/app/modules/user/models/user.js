@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
 	},
 	password: {
 		type: String,
-		validate: [ /^[a-zA-Z0-9@_-]{8,32}$/, `Password must contain the following "[a-zA-Z0-9@_-] and must be minimum 8 character"`],
+		validate: [ /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{8,}$/, `Password must contain the following "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{8,}$/ and must be minimum 8 character"`],
 		required: 'Password is required',
 		trim: true
 	},
