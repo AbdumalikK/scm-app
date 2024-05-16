@@ -40,6 +40,28 @@ export default {
 
 		let auth = {}, user = null, to = null
 
+		try{
+			user = await User.findOne({ username })
+
+			if(user){
+				ctx.status = 400
+				return ctx.body = {
+					success: false,
+					message: `OTP could not be Sent because Username is already registered with us.`,
+					data: {
+						isUsernameAvailable: false
+					}
+				};
+			}
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
+			};
+		}
+
 		switch(type){
 			case SIGNUP_TYPE_PHONE: {
 				const validation = /^\+[0-9]{12}$/
@@ -67,7 +89,7 @@ export default {
 							}
 						};
 					}
-		
+
 					user = await User.create({ phone, password, username, refferal })
 				}catch(ex){
 					ctx.status = 500
@@ -121,7 +143,7 @@ export default {
 				}
 
 				to = email
-				auth['type'] = phone
+				auth['type'] = email
 				break
 			}
 
@@ -423,7 +445,7 @@ export default {
 						ctx.set('x-remove-otp', otp) // need to be removed: -> dev purpose 	q
 						return ctx.body = {
 							success: true,
-							message: `Sms sent successfully`,
+							message: `OTP sent`,
 							data: null
 						}
 					})
@@ -431,7 +453,7 @@ export default {
 						ctx.status = 500
 						return ctx.body = {
 							success: false,
-							message: `Failed to send sms. ${error.message}`,
+							message: `Failed to send OTP. ${error.message}`,
 							data: null
 						}
 					})
@@ -622,112 +644,52 @@ export default {
 		const {
 			request: {
 				body: {
-					type = null,
-					phone = null,
 					email = null
 				}
 			}
 		} = ctx
 
-		if(!type){
+		let user = null
+
+		
+		const validation = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+		const passed = validation.test(email)
+	
+		if(!passed){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Type not passed`,
+				message: `Email validation error`,
 				data: null
 			};
 		}
 
-		let user = null, payload = {}
-
-		switch(type){
-			case SIGNUP_TYPE_PHONE: {
-				const validation = /^\+[0-9]{12}$/
-				const passed = validation.test(phone)
-			
-				if(!passed){
-					ctx.status = 400
-					return ctx.body = {
-						success: false,
-						message: `Phone validation error`,
-						data: null
-					};
-				}
-
-				try {
-					user = await User.findOne({ phone, active: true, deletedAt: { $eq: null } }).select({ __v: 0 })
-				}catch(ex){
-					ctx.status = 404
-					return ctx.body = {
-						success: false,
-						message: `User not found`,
-						data: null
-					}
-				}
-
-				if(!user){
-					ctx.status = 400
-					return ctx.body = {
-						success: false,
-						message: `User with phone=${phone} not found`,
-						data: null
-					};
-				}
-
-				payload['phone'] = user.phone
-
-				break
-			}
-			case SIGNUP_TYPE_EMAIL: {
-				const validation = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-				const passed = validation.test(email)
-			
-				if(!passed){
-					ctx.status = 400
-					return ctx.body = {
-						success: false,
-						message: `Email validation error`,
-						data: null
-					};
-				}
-		
-				try {
-					user = await User.findOne({ email, active: true, deletedAt: { $eq: null } }).select({ __v: 0 })
-				}catch(ex){
-					ctx.status = 404
-					return ctx.body = {
-						success: false,
-						message: `User not found`,
-						data: null
-					}
-				}
-
-
-				if(!user){
-					ctx.status = 400
-					return ctx.body = {
-						success: false,
-						message: `User with email=${email} not found`,
-						data: null
-					};
-				}
-
-				payload['email'] = user.email
-
-				break
-			}
-			default: {
-				ctx.status = 400
-				return ctx.body = {
-					success: false,
-					message: `Invalid value of param type`,
-					data: null
-				};
+		try {
+			user = await User.findOne({ email, active: true, deletedAt: { $eq: null } }).select({ __v: 0 })
+		}catch(ex){
+			ctx.status = 404
+			return ctx.body = {
+				success: false,
+				message: `User not found`,
+				data: null
 			}
 		}
 
-		payload['_id'] = user._id
-		payload['password'] = user.password
+
+		if(!user){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `User with email=${email} not found`,
+				data: null
+			};
+		}
+
+		const payload = {
+			_id: user._id,
+			email: user.email,
+			password: user.password
+		}
 
 		const otp = randomatic('0', 4)
 
@@ -742,46 +704,23 @@ export default {
 			};
 		}
 
-		// const token = jwtService.genTokenPassword(payload, JWT_SECRET + user.password)		
-
-		if(type === SIGNUP_TYPE_PHONE){
-			return SMSService(phone, FORGOT_PASSWORD_PAYLOAD(otp))
-			.then(data => {
-				ctx.status = 201
-				return ctx.body = {
-					success: true,
-					message: `Sms sent successfully`,
-					data: null
+		try {
+			const info = await MailService(user.email, otp, user.username);
+			
+			ctx.status = 201
+			return ctx.body = {
+				success: true,
+				message: `OTP sent`,
+				data: {
+					messageId: info.messageId
 				}
-			})
-			.catch(async error => {
-				ctx.status = 500
-				return ctx.body = {
-					success: false,
-					message: `Failed to send sms. ${error}`,
-					data: null
-				}
-			})
-		}else{
-			try {
-				const info = await MailService(user.email, otp, user.username);
-				console.log('Message sent: %s', info.messageId);
-				
-				ctx.status = 201
-				return ctx.body = {
-					success: true,
-					message: `Email sent successfully`,
-					data: {
-						messageId: info.messageId
-					}
-				}
-			} catch (error) {
-				ctx.status = 500
-				return ctx.body = {
-					success: false,
-					message: `Failed to send email. ${error}`,
-					data: null
-				}
+			}
+		} catch (error) {
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Failed to send OTP. ${error}`,
+				data: null
 			}
 		}
 	},
