@@ -61,8 +61,10 @@ export default {
 						ctx.status = 400
 						return ctx.body = {
 							success: false,
-							message: `User with phone=${phone} already exists`,
-							data: null
+							message: `OTP could not be Sent because Phone is already registered with us.`,
+							data: {
+								isPhoneAvailable: false
+							}
 						};
 					}
 		
@@ -101,8 +103,10 @@ export default {
 						ctx.status = 400
 						return ctx.body = {
 							success: false,
-							message: `User with email=${email} already exists`,
-							data: null
+							message: `OTP could not be Sent because Email is already registered with us.`,
+							data: {
+								isEmailAvailable: false,
+							}
 						}
 					}
 		
@@ -199,8 +203,10 @@ export default {
 				ctx.status = 201
 				return ctx.body = {
 					success: true,
-					message: `Sms sent successfully`,
-					data: null
+					message: `OTP Sent`,
+					data: {
+						isPhoneAvailable: true
+					}
 				}
 			})
 			.catch(async error => {
@@ -221,10 +227,9 @@ export default {
 				ctx.status = 201
 				return ctx.body = {
 					success: true,
-					message: `Email sent successfully`,
+					message: `OTP Sent`,
 					data: {
-						user,
-						messageId: info.messageId
+						isEmailAvailable: true
 					}
 				}
 			} catch (error) {
