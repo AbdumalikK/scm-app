@@ -26,9 +26,7 @@ export default {
             areas = await Area
                 .find({ active: true, deletedAt: { $eq: null } })
                 .select(select)
-                .sort({ createdAt: -1 })
-                .skip(startIndex)
-                .limit(limit)
+                .sort({ createdAt: 1 })
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
