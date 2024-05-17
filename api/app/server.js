@@ -32,7 +32,6 @@ client.on('error', function(error) {
 
 client.set(Object.keys(errors)[0], JSON.stringify(ERRORS))
 
-
 // server
 const server = http.createServer(app.callback())
 

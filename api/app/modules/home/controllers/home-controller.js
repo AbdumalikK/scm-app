@@ -20,7 +20,7 @@ export default {
         } = ctx
 
 
-        let history = {}
+        let stories = {}
 
         const select = {
             __v: 0,
@@ -46,21 +46,23 @@ export default {
                         deletedAt: { $eq: null }
                     })
     
-                    history[`${followings[i].userUsername}`] = userHistory    
+                    stories[`${followings[i].userUsername}`] = userHistory    
                 }
             }
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
-                follows,
+            message: `Stories`,
+            data: {
+                stories,
                 pagination: result
             }
         }
@@ -129,10 +131,11 @@ export default {
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Feeds`,
+            data: {
                 follows,
                 pagination: result
-            }
+            },
         }
 	}
 };

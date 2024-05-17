@@ -31,13 +31,15 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`
+				message: `${ex.message}`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Chat added`,
+            data: {
                 chat
             }
         }
@@ -59,7 +61,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Sender id not passed`
+				message: `Sender id not passed`,
+                data: null
 			};
         }
 
@@ -67,7 +70,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Sender id does not belong to user with id=${_id}`
+				message: `Sender id does not belong to user with id=${_id}`,
+                data: null
 			};
         }
 
@@ -124,15 +128,73 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Chats`,
+            data: {
                 chats,
                 pagination: result
+            }
+        }
+	},
+
+    async getChat(ctx){
+		const { 
+            request: {
+                query
+            },
+            state: {
+                user: {
+                    _id
+                }
+            }
+        } = ctx
+
+        if(!query.recipientId){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Recipient id not passed`,
+                data: null
+			};
+        }
+
+        let chat = null
+
+		try{
+            chat = await Chat.aggregate([
+                { $match: { senderId: _id, recipientId: query.recipientId, creatorId: _id, active: true, deletedAt: { $eq: null }  } },
+                { $project: { __v: 0 } },
+                {
+                  $lookup: {
+                    from: 'users',
+                    as: 'users',
+                    pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id', _id] }] }}}, { $project: { __v: 0, password: 0, deletedAt: 0 } }]
+                  }
+                },
+              ])
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Chat`,
+            data: {
+                chat
             }
         }
 	},
@@ -161,20 +223,23 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Chat with id=${id} does not belong to user with id=${_id}`
+                    message: `Chat with id=${id} does not belong to user with id=${_id}`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `${ex.message}`
+				message: `${ex.message}`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: {
+            message: `Chat updated`,
+            data: {
                 chat
             }
         }
@@ -205,20 +270,25 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Chat with id=${id} does not belong to user with id=${_id}`
+                    message: `Chat with id=${id} does not belong to user with id=${_id}`,
+                    data: null
                 };
             }
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 		
         return ctx.body = {
             success: true,
-            message: 'Chat successfully deleted'
+            message: 'Chat successfully deleted',
+            data: {
+                _id: id
+            }
         }
 	},
 
@@ -238,7 +308,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Sender id not passed`
+				message: `Sender id not passed`,
+                data: null
 			};
         }
 
@@ -246,7 +317,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Sender id does not belong to user with id=${_id}`
+				message: `Sender id does not belong to user with id=${_id}`,
+                data: null
 			};
         }
 
@@ -276,7 +348,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error`,
+                data: null
 			};
 		}
 

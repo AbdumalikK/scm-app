@@ -10,7 +10,8 @@ export default () => async (id, ctx, next) => {
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `Interest with id=${id} not found`
+                message: `Interest with id=${id} not found`,
+                data: null
             }
         }
     }catch(ex){
@@ -18,7 +19,8 @@ export default () => async (id, ctx, next) => {
         ctx.status = 400
         return ctx.body = {
             success: false,
-            message: `Internal error`
+            message: `Internal error`,
+            data: null
         }
     }
 

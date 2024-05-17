@@ -91,7 +91,8 @@ router
 		ctx.status = 500
 		return ctx.body = {
 			success: false,
-			message: 'Somehting went wrong'
+			message: 'Somehting went wrong',
+			data: null
 		}
 	})
 

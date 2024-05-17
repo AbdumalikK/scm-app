@@ -23,7 +23,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Chat id not passed`
+				message: `Chat id not passed`,
+                data: null
 			};
         }
 
@@ -31,7 +32,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Sender id not passed`
+				message: `Sender id not passed`,
+                data: null
 			};
         }
 
@@ -39,7 +41,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Recipient id not passed`
+				message: `Recipient id not passed`,
+                data: null
 			};
         }
 
@@ -233,7 +236,7 @@ export default {
             success: true,
             message: 'Message successfully deleted',
             data: {
-                messageId: id
+                _id: id
             }
         }
     },

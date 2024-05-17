@@ -14,13 +14,23 @@ const AreaSchema = new mongoose.Schema({
     required: true
   },
   state: [{
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
     name: {
       type: String,
       required: true
     },
     city: [{
-      type: String,
-      default: null
+      _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
+      },
+      name: {
+        type: String,
+        default: null
+      }
     }]
   }],
   deletedAt: {

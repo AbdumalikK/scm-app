@@ -5,7 +5,8 @@ export default () => async (ctx, next) => {
 		ctx.status = 404
 		return ctx.body = {
 			success: false,
-			message: ERRORS['NotFound']
+			message: ERRORS['NotFound'],
+			data: null
 		}
 	}
 	await next();

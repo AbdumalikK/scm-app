@@ -68,6 +68,7 @@ const UserSchema = new mongoose.Schema({
 	},
 	area: {
 		city: {
+			
 			type: String,
 			default: null 
 		},

@@ -7,7 +7,8 @@ export default () => async (type, ctx, next) => {
         ctx.status = 400
         return ctx.body = {
             success: false,
-            message: `Invalid value of param type. Got: ${type}. Expected: ${FOLLOWING} or ${FOLLOWERS}`
+            message: `Invalid value of param type. Got: ${type}. Expected: ${FOLLOWING} or ${FOLLOWERS}`,
+            data: null
         }
     }
 

@@ -11,14 +11,16 @@ export default () => async (id, ctx, next) => {
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `Message with id=${id} not found`
+                message: `Message with id=${id} not found`,
+                data: null
             }
         }
     }catch(ex){
         ctx.status = 400
         return ctx.body = {
             success: false,
-            message: `Internal error`
+            message: `Internal error`,
+            data: null
         }
     }
 

@@ -80,6 +80,7 @@ router
     .param('id', checkId())
 
     // followings
+    .get('/:id', checkUser(), chatController.getChat)
     .get('/', checkUser(), chatController.getChats)
     .post('/', checkUser(), chatController.addChat)
     .patch('/:id', checkUser(), chatController.updateChat)
