@@ -7,7 +7,7 @@ export default () => async (ctx, next) => {
 		ctx.status = 403
 		return ctx.body = {
 			success: false,
-			message: ERRORS['Forbidden'],
+			message: `You don't have permission`,
 			data: null
 		}
 	}

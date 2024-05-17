@@ -67,18 +67,35 @@ const UserSchema = new mongoose.Schema({
 		default: null
 	},
 	area: {
-		city: {
-			
-			type: String,
-			default: null 
+		country: {
+			_id: {
+				type: mongoose.Schema.Types.ObjectId,
+				default: null
+			},
+			name: {
+				type: String,
+				default: null
+			} 
 		},
 		state: {
-			type: String,
-			default: null
+			_id: {
+				type: mongoose.Schema.Types.ObjectId,
+				default: null
+			},
+			name: {
+				type: String,
+				default: null
+			} 
 		},
-		country: {
-			type: String,
-			default: null
+		city: {
+			_id: {
+				type: mongoose.Schema.Types.ObjectId,
+				default: null
+			},
+			name: {
+				type: String,
+				default: null
+			} 
 		}
 	},
 	interests: [{
