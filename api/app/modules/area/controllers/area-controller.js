@@ -6,10 +6,7 @@ import logger from '../../../utils/logs/logger'
 
 export default {
     async getAreas(ctx){
-		const { 
-            request: {
-                query
-            },
+		const {
             state: {
                 user: {
                     _id
@@ -17,32 +14,10 @@ export default {
             }
         } = ctx
 
-        const page = parseInt(query.page) || 1
-        const limit = parseInt(query.limit) || 30
-        const paginationMetaData = {}
-
         const select = {
             __v: 0,
             deletedAt: 0,
             active: 0
-        }
-
-        const total = await Area.countDocuments({ active: true, deletedAt: { $eq: null } }).exec()
-        const startIndex = page === 1 ? 0 : (page - 1) * limit;
-        const endIndex = page * limit;
-        paginationMetaData.page = page
-        paginationMetaData.totalPages = Math.ceil(total / limit)
-        paginationMetaData.limit = limit
-        paginationMetaData.total = total
-
-        if (startIndex > 0){
-            paginationMetaData.prevPage = page - 1
-            paginationMetaData.hasPrevPage = true
-        }
-
-        if (endIndex < total) {
-            paginationMetaData.nextPage = page + 1
-            paginationMetaData.hasNextPage = true
         }
 
         let areas = null
@@ -68,8 +43,7 @@ export default {
             message: `Areas`,
             data: {
                 areas
-            },
-            paginationMetaData
+            }
         }
 	},
     
