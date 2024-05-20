@@ -1,4 +1,5 @@
 import { io } from '../../../server'
+import { Chat } from '../models';
 
 const users = [];
 
@@ -32,7 +33,6 @@ export const init = () => {
   io.use((socket, next) => {
     console.log('socket id', socket.id)
     if (socket.request) {
-      console.log('request', socket.request)
       next();
     } else {
       next(new Error("invalid"));
@@ -40,18 +40,26 @@ export const init = () => {
   });
 
   io.on('connect', (socket) => {
-    socket.on('join', ({ creatorId, userId }, callback) => {
-      console.log(`creatorId=${creatorId}, userId=${userId}`)
-      const { error, user } = addUser({ id: socket.id, name, room });
+    socket.on('join', async ({ senderId, recipientId }, callback) => {
+      console.log(`senderId=${senderId}, recipientId=${recipientId}`)
 
-      if(error) return callback(error);
+      let chat = await Chat.findOne({ senderId, recipientId })
 
-      socket.join(user.room);
+      if(!chat){
+        chat = await Chat.create({ senderId, recipientId, creatorId: senderId })
+      }
+      // senderId: 6645b5de344bc0c9aab565d1
+      // recipientId: 6645b73afae344ca67ab6327
 
-      socket.emit('message', { user: 'admin', text: `${user.name}, welcome to room ${user.room}.`});
-      socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${user.name} has joined!` });
+      // if(true) return callback({ error: 'Username is taken.' });
 
-      io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
+      socket.join(chat._id);
+
+      console.log('chatId', chat._id)
+      socket.emit('message', { user: 'admin', text: `${test1}, welcome to room ${chat._id}.`});
+      socket.broadcast.to(chat._id).emit('message', { user: 'admin', text: `${test2} has joined!` });
+
+      // io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
 
       callback();
     });
@@ -59,7 +67,7 @@ export const init = () => {
     socket.on('sendMessage', (message, callback) => {
       const user = getUser(socket.id);
 
-      io.to(user.room).emit('message', { user: user.name, text: message });
+      io.to('').emit('message', { user: user.name, text: message });
 
       callback();
     });

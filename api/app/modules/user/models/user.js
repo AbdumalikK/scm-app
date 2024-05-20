@@ -117,7 +117,7 @@ const UserSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 UserSchema.statics.createFields = [ 
-	'firstName', 'lastName', 'username', 'refferal', 'description',
+	'firstName', 'lastName', 'username', 'refferal', 'bio',
 	'password', 'role', 'phone', 'email', 'avaUri', 'private', 'business',
 	'gender', 'area', 'interests', 'isOnboardingCompleted'
 ];
