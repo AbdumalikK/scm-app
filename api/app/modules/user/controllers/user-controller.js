@@ -146,7 +146,7 @@ export default {
             },  
         } = ctx
 
-        if(!query.contacts || !Array.isArray(query.contacts)){
+        if(!query.contacts || !Array.isArray(JSON.parse(query.contacts))){
             ctx.status = 400
 			return ctx.body = {
 				success: false,
@@ -167,6 +167,8 @@ export default {
                     verified: 1,
                     avaUri: 1
                 })
+
+                if(!user) continue
 
                 const isFollowing = await Following.findOne({ creatorId: user._id, userId: _id })
     
