@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt-nodejs'
 import uniqueValidator from 'mongoose-unique-validator'
+import { validate } from 'uuid'
 
 mongoose.plugin(uniqueValidator)
 

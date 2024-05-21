@@ -15,6 +15,7 @@ import report from './report'
 import search from './search'
 import area from './area'
 import interest from './interest'
+import phonebook from './phonebook'
 
 const router = new Router()
 
@@ -33,6 +34,7 @@ router.use(report)
 router.use(search)
 router.use(area)
 router.use(interest)
+router.use(phonebook)
 
 
 export default router.routes()
