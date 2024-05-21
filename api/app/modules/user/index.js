@@ -49,6 +49,9 @@ const router = new Router({ prefix: '/profile' })
 router
     .param('id', checkId())
     
+    // contacts
+    .get('/contacts', checkUser(), userController.getContacts)
+
     // user
     .get('/', checkUser(), userController.getUser)
     .put('/:id', checkUser(), userController.updateUser)

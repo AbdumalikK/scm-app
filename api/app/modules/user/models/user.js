@@ -46,6 +46,10 @@ const UserSchema = new mongoose.Schema({
 		type: String,
 		default: null,
 	},
+	verified: {
+		type: Boolean,
+		default: false
+	},
 	email: {
 		type: String,
 		default: null
@@ -118,8 +122,9 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.statics.createFields = [ 
 	'firstName', 'lastName', 'username', 'refferal', 'bio',
-	'password', 'role', 'phone', 'email', 'avaUri', 'private', 'business',
-	'gender', 'area', 'interests', 'isOnboardingCompleted'
+	'password', 'role', 'phone', 'email', 'avaUri', 'private', 
+	'business', 'gender', 'area', 'interests', 'verified', 
+	'isOnboardingCompleted'
 ];
 
 UserSchema.pre('save', function(next){
