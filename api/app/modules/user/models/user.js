@@ -75,7 +75,7 @@ const UserSchema = new mongoose.Schema({
 		country: {
 			_id: {
 				type: mongoose.Schema.Types.ObjectId,
-				default: null
+				auto: true
 			},
 			name: {
 				type: String,
@@ -85,7 +85,7 @@ const UserSchema = new mongoose.Schema({
 		state: {
 			_id: {
 				type: mongoose.Schema.Types.ObjectId,
-				default: null
+				auto: true
 			},
 			name: {
 				type: String,
@@ -95,7 +95,7 @@ const UserSchema = new mongoose.Schema({
 		city: {
 			_id: {
 				type: mongoose.Schema.Types.ObjectId,
-				default: null
+				auto: true
 			},
 			name: {
 				type: String,
