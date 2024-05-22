@@ -22,7 +22,7 @@ export default {
         const limit = parseInt(query.limit) || 30
         const paginationMetaData = {}
 
-        const total = await Phonebook.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec()
+        const total = await Phonebook.countDocuments({ creatorId: _id }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
         paginationMetaData.page = page
