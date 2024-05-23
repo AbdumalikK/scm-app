@@ -19,7 +19,7 @@ export default {
             } 
         } = ctx
 
-        if(id !== _id){
+        if(id != _id){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
