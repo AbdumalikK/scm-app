@@ -50,7 +50,7 @@ router
     .param('id', checkId())
 
     // user
-    .get('/', checkUser(), userController.getUser)
+    .get('/:id', checkUser(), userController.getUser)
     .put('/:id', checkUser(), userController.updateUser)
     .delete('/:id', checkUser(), userController.deleteUser)
 

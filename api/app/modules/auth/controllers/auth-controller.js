@@ -38,9 +38,12 @@ export default {
 			};
 		}
 
-		let auth = {}, user = null, to = null
+		let auth = {}, user = null, to = null, userId = 0
 
 		try{
+			const count = await User.countDocuments({ active: true, deletedAt: { $eq: null } })
+			userId = count + 1
+
 			user = await User.findOne({ username })
 
 			if(user){
@@ -90,7 +93,7 @@ export default {
 						};
 					}
 
-					user = await User.create({ phone, password, username, refferal })
+					user = await User.create({ id: userId, phone, password, username, refferal })
 				}catch(ex){
 					ctx.status = 500
 					return ctx.body = {
@@ -132,7 +135,7 @@ export default {
 						}
 					}
 		
-					user = await User.create({ email, password, username, refferal })
+					user = await User.create({ id: userId, email, password, username, refferal })
 				}catch(ex){
 					ctx.status = 500
 					return ctx.body = {
@@ -328,7 +331,6 @@ export default {
 			}
 		}
 
-		console.log('otp exist', otpExist, ', user', user)
 		try {
 			const { token, refreshToken } = await issueTokenPair(otpExist.type, user)
 
@@ -342,7 +344,6 @@ export default {
 				}
 			}
 		}catch(ex){
-			console.log(ex)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,

@@ -6,6 +6,10 @@ import { validate } from 'uuid'
 mongoose.plugin(uniqueValidator)
 
 const UserSchema = new mongoose.Schema({
+	id: {
+		type: Number,
+		required: true
+	},
 	firstName: {
 		type: String,
 		trim: true,

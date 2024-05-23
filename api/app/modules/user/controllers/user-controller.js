@@ -10,7 +10,23 @@ import logger from '../../../utils/logs/logger'
 
 export default {
 	async getUser(ctx){
-		const { state: { user: { _id } } } = ctx
+		const {
+            state: { 
+                user: { 
+                    _id 
+                },
+                id 
+            } 
+        } = ctx
+
+        if(id !== _id){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `User id=${_id} does not belong to user with id=${id}`,
+                data: null
+			}
+        }
 
 		let user = {}
 
