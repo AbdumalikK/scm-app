@@ -12,6 +12,7 @@ import checkLikeId from './handlers/check-like-id'
 import checkReplyId from './handlers/check-reply-id'
 import checkReplyLikeId from './handlers/check-reply-like-id'
 import checkId from './handlers/check-id'
+import checkUserId from './handlers/check-user-id'
 
 import { Image } from '../image/models'
 import { Video } from '../video/models'
@@ -79,6 +80,35 @@ const video = multer({
 })
 // -----
 
+// ----- post tv -----
+const tvStorage = multer.diskStorage({
+	destination: async function (ctx, file, cb) {
+        const user = await getUser(ctx)
+
+        const videoDir = path.resolve(path.join(process.cwd() + `/uploads/videos/${user._id}/tv`))
+
+        if (!fs.existsSync(videoDir)){
+            fs.mkdirSync(videoDir, { recursive: true })
+        }
+
+        cb(null, `./uploads/videos/${user._id}/tv`) 
+    },
+
+	filename: function (ctx, file, cb) { cb(null, `${random()}-${Date.now()}-${file.originalname}`) }
+})
+
+const tvFilter = (ctx, file, cb) => {
+	if (file.mimetype === 'video/webm' || file.mimetype === 'video/mp4' || file.mimetype === 'video/ogg') cb(null, true)
+	else cb(null, false)
+}
+
+const tv = multer({
+	storage: tvStorage,
+	limits: { maxFileSize: 1024 * 1024 * 100 }, // 1tb
+	fileFilter: tvFilter
+})
+// -----
+
 const router = new Router({ prefix: '/post' })
 
 router
@@ -87,10 +117,12 @@ router
     .param('likeId', checkLikeId())
     .param('replyId', checkReplyId())
     .param('replyLikeId', checkReplyLikeId())
+    .param('userId', checkUserId())
     
 
     
     .get('/:id', checkUser(), postController.getPost)
+    .get('/:userId', checkUser(), postController.getPostsByUserId)
     .get('/', checkUser(), postController.getPosts)
     .post('/', checkUser(), postController.addPost)
     .put('/:id', checkUser(), postController.updatePost)
@@ -195,6 +227,52 @@ router
             message: `Images uploaded`,
             data: {
                 images
+            }
+        }
+    })
+
+
+    // tv
+    .post('/upload/tv', checkUser(), tv.any('file'), async function (ctx){
+        const {
+            state: { user },
+            req: { files }
+        } = ctx
+
+        const tvs = []
+
+        try {
+            for(let i = 0; i < files.length; i++){
+                const newTv = await Video.create({
+                    name: files[i].filename,
+                    originalName: files[i].originalname,
+                    data: files[i].path,
+                    encoding: files[i].encoding,
+                    size: files[i].size,
+                    mimetype: files[i].mimetype,
+                    creatorId: user._id,
+                    comment: POST,
+                    isTv: true
+                })
+    
+                await newTv.save()
+                tvs.push(newTv)
+            }
+        }catch(ex){
+            ctx.status = 500
+            return ctx.body = {
+                success: false,
+                message: ex.message,
+                data: null
+            }
+        }
+        
+
+        return ctx.body = {
+            success: true,
+            message: `Tvs uploaded`,
+            data: {
+                tvs
             }
         }
     })

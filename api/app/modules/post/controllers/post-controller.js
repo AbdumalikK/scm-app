@@ -37,6 +37,81 @@ export default {
 	},
 
 
+    async getPostsByUserId(ctx){
+		const { 
+            request: {
+                query
+            },
+            state: {
+                user: {
+                    _id
+                },
+                userId
+            }
+        } = ctx
+
+
+        let posts = null
+
+        const page = parseInt(query.page) || 1;
+        const limit = parseInt(query.limit) || 30;
+        const paginationMetaData = {}
+
+        const select = {
+            __v: 0,
+            deletedAt: 0,
+            active: 0
+        }
+
+        const total = await Post.countDocuments({ 
+            creatorId: userId,
+            active: true, 
+            deletedAt: { $eq: null }
+        }).exec()
+        const startIndex = page === 1 ? 0 : (page - 1) * limit;
+        const endIndex = page * limit;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
+
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
+        }
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
+        }
+
+		try{
+            posts = await Post
+                .find({ creatorId: userId, active: true, deletedAt: { $eq: null } })
+                .select(select)
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Posts`,
+            data: {
+                posts
+            },
+            paginationMetaData
+        }
+	},
+
+
     async getPosts(ctx){
 		const { 
             request: {
@@ -110,11 +185,7 @@ export default {
     async addPost(ctx){
 		const { 
             request: { 
-                body: {
-                    mediaUri,
-                    comment,
-                    tags
-                }
+                body
             },
             state: {
                 user: {
@@ -123,15 +194,24 @@ export default {
             }
         } = ctx
 
+
+        const data = pick(body, Post.createFields);
+
         let post = null
 
 		try{
-            post = await Post.create({ 
-                mediaUri,
-                creatorId: _id,
-                comment,
-                tags
-            })
+            const user = await User.findById(_id)
+
+            if(data.isTv && !user.creator){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `User can not post tv`,
+                    data: null
+                }
+            }
+
+            post = await Post.create({ creatorId: _id, ...data })
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
@@ -488,7 +568,7 @@ export default {
 
 		try{
 			post = await Post.findOneAndUpdate(
-                { 
+                {
                     _id: postId, 
                     creatorId: _id,
                     comment: {
@@ -502,7 +582,7 @@ export default {
                         }
                     }
                 },
-                { 
+                {
                     $set: { 
                         'comment.$[i].like.$[j].active': false,
                         'comment.$[i].like.$[j].deletedAt': new Date()

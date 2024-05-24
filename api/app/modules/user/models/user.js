@@ -68,7 +68,11 @@ const UserSchema = new mongoose.Schema({
 		default: false
 	},
 	business: {
-		type: Boolean,
+		type: Boolean, // for ads
+		default: false
+	},
+	creator: {
+		type: Boolean, // for posting a tv and earning coins
 		default: false
 	},
 	gender: {
@@ -129,7 +133,7 @@ UserSchema.statics.createFields = [
 	'firstName', 'lastName', 'username', 'refferal', 'bio',
 	'password', 'role', 'phone', 'email', 'avaUri', 'private', 
 	'business', 'gender', 'area', 'interests', 'verified', 
-	'isOnboardingCompleted'
+	'isOnboardingCompleted', 'creator'
 ];
 
 UserSchema.pre('save', function(next){

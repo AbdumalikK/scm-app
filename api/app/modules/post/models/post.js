@@ -12,6 +12,18 @@ const PostSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	}],
+	isTv: {
+		type: Boolean,
+		default: false
+	},
+	price: {
+		type: Number,
+		default: 0
+	},
+	audience: [{
+		type: mongoose.Schema.Types.ObjectId,
+		required: true
+	}],
 	like: [{
 		creatorId: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -124,6 +136,10 @@ const PostSchema = new mongoose.Schema({
 		type: String,
 		default: null
 	}],
+	paid: {
+		type: Boolean,
+		default: false
+	},
 	deletedAt: {
 		type: Date,
 		default: null
@@ -134,6 +150,9 @@ const PostSchema = new mongoose.Schema({
 	}
 }, { timestamps: true })
 
-PostSchema.statics.createFields = [ 'mediaUri', 'tags' ]
+PostSchema.statics.createFields = [ 
+	'mediaUri', 'tags', 'isTv', 'price', 'audience', 'like',
+	'comment', 'gifts', 'tags', 'paid'
+]
 
 export default mongoose.model('post', PostSchema)

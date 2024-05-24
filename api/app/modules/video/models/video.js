@@ -6,6 +6,10 @@ const VideoSchema = new mongoose.Schema({
     default: 'none',
     required: true
   },
+  isTv: {
+    type: Boolean,
+    default: false
+  },
   data: {
     type: String,
     required: true
