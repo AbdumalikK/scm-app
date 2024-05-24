@@ -49,7 +49,7 @@ export default {
 		const { 
             request: { 
                 body: {
-                    country = null,
+                    name = null,
                     isoCode = null,
                     state = null
                 }
@@ -81,7 +81,7 @@ export default {
         }
 
 		try{
-            area = await Area.create({ country, isoCode, state, creatorId: _id })
+            area = await Area.create({ name, isoCode, state, creatorId: _id })
 		}catch(ex){
 			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500

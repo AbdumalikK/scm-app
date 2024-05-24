@@ -5,7 +5,7 @@ const AreaSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true
   },
-  country: {
+  name: {
     type: String,
     required: true
   },
