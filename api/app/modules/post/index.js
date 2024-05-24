@@ -122,7 +122,7 @@ router
 
     
     .get('/:id', checkUser(), postController.getPost)
-    .get('/:userId', checkUser(), postController.getPostsByUserId)
+    .get('/user/:userId', checkUser(), postController.getPostsByUserId)
     .get('/', checkUser(), postController.getPosts)
     .post('/', checkUser(), postController.addPost)
     .put('/:id', checkUser(), postController.updatePost)
