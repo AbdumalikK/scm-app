@@ -1,37 +1,10 @@
 import { io } from '../../../server'
-import { Chat } from '../models';
-
-const users = [];
-
-const addUser = ({ id, name, room }) => {
-  name = name.trim().toLowerCase();
-  room = room.trim().toLowerCase();
-
-  const existingUser = users.find((user) => user.room === room && user.name === name);
-
-  if(!name || !room) return { error: 'Username and room are required.' };
-  if(existingUser) return { error: 'Username is taken.' };
-
-  const user = { id, name, room };
-
-  users.push(user);
-
-  return { user };
-}
-
-const removeUser = (id) => {
-  const index = users.findIndex((user) => user.id === id);
-
-  if(index !== -1) return users.splice(index, 1)[0];
-}
-
-const getUser = (id) => users.find((user) => user.id === id);
-
-const getUsersInRoom = (room) => users.filter((user) => user.room === room);
+import { Chat } from '../models'
+import { Message } from '../../message/models'
+import { User } from '../../user/models';
 
 export const init = () => {
   io.use((socket, next) => {
-    console.log('socket id', socket.id)
     if (socket.request) {
       next();
     } else {
@@ -43,42 +16,61 @@ export const init = () => {
     socket.on('join', async ({ senderId, recipientId }, callback) => {
       console.log(`senderId=${senderId}, recipientId=${recipientId}`)
 
-      let chat = await Chat.findOne({ senderId, recipientId })
+      const chat = await Chat.findOne({ $or: [{ senderId, recipientId }, { senderId: recipientId, recipientId: senderId }] })
 
       if(!chat){
         chat = await Chat.create({ senderId, recipientId, creatorId: senderId })
       }
-      // senderId: 6645b5de344bc0c9aab565d1
-      // recipientId: 6645b73afae344ca67ab6327
+      // senderId: 664d9de76bf5734214fc966d
+      // recipientId: 664d9de86bf5734214fc9678
+      
+      socket.join(chat._id.toString())
+      const sender = await User.findById(senderId)
+      const recipient = await User.findById(recipientId)
 
-      // if(true) return callback({ error: 'Username is taken.' });
-
-      socket.join(chat._id);
-
-      console.log('chatId', chat._id)
-      socket.emit('message', { user: 'admin', text: `${test1}, welcome to room ${chat._id}.`});
-      socket.broadcast.to(chat._id).emit('message', { user: 'admin', text: `${test2} has joined!` });
-
-      // io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
+      io.to(chat._id.toString()).emit('roomData', { room: chat._id, users: [sender, recipient] });
 
       callback();
     });
 
-    socket.on('sendMessage', (message, callback) => {
-      const user = getUser(socket.id);
+    socket.on('message', async ({ message, senderId, recipientId = null}, callback) => {
+      const chat = await Chat.findOne({ $or: [{ senderId, recipientId }, { senderId: recipientId, recipientId: senderId }] })
 
-      io.to('').emit('message', { user: user.name, text: message });
+      if(!chat){
+        chat = await Chat.create({ senderId, recipientId, creatorId: senderId })
+      }
+
+      await Message.create({ senderId, recipientId, chatId: chat._id, 'message.payload': message, creatorId: senderId })
+
+      const sender = await User.findById(senderId)
+      io.to(chat._id.toString()).emit('message', { user: sender.username, text: message });
 
       callback();
     });
 
     socket.on('disconnect', () => {
-      const user = removeUser(socket.id);
+      // socket.id
 
-      if(user) {
-        io.to(user.room).emit('message', { user: 'Admin', text: `${user.name} has left.` });
-        io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room)});
-      }
+      // if(user) {
+      //   io.to(user.room).emit('message', { user: 'Admin', text: `${user.name} has left.` });
+      //   io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room)});
+      // }
     })
-  });  
+
+    setInterval(async () => {
+      const { senderId } = socket.data 
+
+      const messagesUnreadCount = await Message.countDocuments({ senderId, active: true, deletedAt: { $eq: null }  }).exec()
+      
+      socket.emit('messages', { messagesUnreadCount });
+    }, 10000);
+
+    setInterval(async () => {
+      const { senderId } = socket.data 
+
+      const messagesUnreadCount = await Message.countDocuments({ senderId, active: true, deletedAt: { $eq: null }  }).exec()
+      
+      socket.emit('messages', { messagesUnreadCount });
+    }, 10000);
+  });
 }
