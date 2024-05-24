@@ -6,6 +6,7 @@ import { client } from '../../../server'
 import { SIGNUP_PAYLOAD, FORGOT_PASSWORD_PAYLOAD } from '../constants'
 import { SIGNUP_TYPE_PHONE, SIGNUP_TYPE_EMAIL } from '../constants/types'
 import { User } from '../../user/models'
+import { Wallet } from '../../wallet/models'
 import { Privacy } from '../../privacy/models'
 import { SMSService } from '../../../services/sms'
 import issueTokenPair from '../../../helpers/issueTokenPair'
@@ -196,6 +197,17 @@ export default {
 
 		try{
 			await client.set(otp, JSON.stringify(auth), 'EX', 60 * 5)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
+			};
+		}
+
+		try{
+			await Wallet.create({ creatorId: user._id })
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {

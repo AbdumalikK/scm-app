@@ -16,6 +16,8 @@ import search from './search'
 import area from './area'
 import interest from './interest'
 import phonebook from './phonebook'
+import internalTransaction from './internal-transaction'
+import currency from './currency'
 
 const router = new Router()
 
@@ -35,6 +37,8 @@ router.use(search)
 router.use(area)
 router.use(interest)
 router.use(phonebook)
+router.use(internalTransaction)
+router.use(currency)
 
 
 export default router.routes()
