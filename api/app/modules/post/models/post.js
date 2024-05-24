@@ -12,6 +12,14 @@ const PostSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	}],
+	title: {
+		type: String,
+		default: null
+	},
+	description: {
+		type: String,
+		default: null
+	},
 	isTv: {
 		type: Boolean,
 		default: false
@@ -151,8 +159,8 @@ const PostSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 PostSchema.statics.createFields = [ 
-	'mediaUri', 'tags', 'isTv', 'price', 'audience', 'like',
-	'comment', 'gifts', 'tags', 'paid'
+	'mediaUri', 'title', 'description', 'isTv', 'price', 'audience', 
+	'like', 'comment', 'gifts', 'tags', 'paid'
 ]
 
 export default mongoose.model('post', PostSchema)
