@@ -6,6 +6,8 @@ import { Wallet } from '../../wallet/models'
 
 import logger from '../../../utils/logs/logger'
 import { SOM } from '../constants'
+import { isNumber } from 'lodash'
+import { User } from '../../user/models'
 
 
 export default {
@@ -105,7 +107,7 @@ export default {
             }
         }
 
-        if(!coin){
+        if(!coin || !isNumber(coin)){
             ctx.status = 400
             return ctx.body = {
                 success: false,
@@ -136,7 +138,32 @@ export default {
         let internalTransaction = null
 
 		try{
-            let senderWallet = await Wallet.findOne({ creatorId: senderId })
+            // check users
+            const sender = await User.findOne({ _id: senderId, active: true, deletedAt: { $eq: null } })
+
+            if(!sender){
+                ctx.status = 400
+                return ctx.status = {
+                    success: false,
+                    message: `User with id=${senderId} not found`,
+                    data: null
+                }
+            }
+
+            const recipient = await User.findOne({ _id: recipientId, active: true, deletedAt: { $eq: null } })
+            
+            if(!recipient){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `User with id=${recipientId} not found`,
+                    data: null
+                }
+            }
+            
+                
+            // check wallets
+            let senderWallet = await Wallet.findOne({ creatorId: senderId, active: true, deletedAt: { $eq: null } })
 
             if(!senderWallet){
                 ctx.status = 400
@@ -147,7 +174,7 @@ export default {
                 };
             }
 
-            let recipientWallet = await Wallet.findOne({ creatorId: recipientId })
+            let recipientWallet = await Wallet.findOne({ creatorId: recipientId, active: true, deletedAt: { $eq: null } })
 
             if(!recipientWallet){
                 ctx.status = 400
@@ -186,6 +213,7 @@ export default {
 
             const amount = coin * currency[0].exchangeRate
 
+            // save internal transaction
             internalTransaction = await InternalTransaction.create({ 
                 creatorId: _id,
                 senderId,
