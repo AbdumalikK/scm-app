@@ -65,6 +65,7 @@ export default {
 
         const total = await Post.countDocuments({ 
             creatorId: userId,
+            audience: { $exists: true, $eq: [] },
             active: true, 
             deletedAt: { $eq: null }
         }).exec()
@@ -87,7 +88,7 @@ export default {
 
 		try{
             posts = await Post
-                .find({ creatorId: userId, active: true, deletedAt: { $eq: null } })
+                .find({ creatorId: userId, audience: { $exists: true, $eq: [] }, active: true, deletedAt: { $eq: null } })
                 .select(select)
                 .sort({ createdAt: -1 })
                 .skip(startIndex)
