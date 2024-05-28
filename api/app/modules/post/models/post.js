@@ -144,6 +144,10 @@ const PostSchema = new mongoose.Schema({
 		type: String,
 		default: null
 	}],
+	countViewers: {
+		type: Number,
+		default: 0
+	},
 	paid: {
 		type: Boolean,
 		default: false
@@ -160,7 +164,7 @@ const PostSchema = new mongoose.Schema({
 
 PostSchema.statics.createFields = [ 
 	'mediaUri', 'title', 'description', 'isTv', 'price', 'audience', 
-	'like', 'comment', 'gifts', 'tags', 'paid'
+	'like', 'comment', 'gifts', 'tags', 'paid', 'countViewers'
 ]
 
 export default mongoose.model('post', PostSchema)

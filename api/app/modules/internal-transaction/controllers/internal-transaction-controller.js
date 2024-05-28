@@ -223,7 +223,8 @@ export default {
                 coin,
                 exchangeRate: currency[0].exchangeRate,
                 currency: SOM,
-                amount
+                amount,
+                p2p: true
             })
 
             // save calculated coin 

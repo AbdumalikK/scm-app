@@ -33,6 +33,14 @@ const InternalTransactionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  p2p: {
+    type: Boolean,
+    default: false
+  },
+  p2tv: {
+    type: Boolean,
+    default: false
+  },
   amount: {
     type: Number,
     required: true

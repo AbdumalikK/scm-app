@@ -119,14 +119,21 @@ router
     .param('replyLikeId', checkReplyLikeId())
     .param('userId', checkUserId())
     
+    // tv
+    .get('/tv', checkUser(), postController.getTvs)
+    .get('/tv/user/:userId', checkUser(), postController.getTvsByUserId)
 
-    
+
+    .post('/unlock', checkUser(), postController.unlockPost)    
     .get('/:id', checkUser(), postController.getPost)
     .get('/user/:userId', checkUser(), postController.getPostsByUserId)
     .get('/', checkUser(), postController.getPosts)
     .post('/', checkUser(), postController.addPost)
     .put('/:id', checkUser(), postController.updatePost)
     .delete('/:id', checkUser(), postController.deletePost)
+
+    // count views
+    .post('/:id/viewer', checkUser(), postController.addViewer)
 
     // comment
     .post('/:id/comment', checkUser(), postController.addPostComment)

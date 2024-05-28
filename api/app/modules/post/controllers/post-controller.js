@@ -4,9 +4,151 @@ import { User } from '../../user/models'
 import { Post } from '../models'
 
 import logger from '../../../utils/logs/logger'
+import { Wallet } from '../../wallet/models';
+import { Currency } from '../../currency/models';
+import { InternalTransaction } from '../../internal-transaction/models';
+import { SOM } from '../../internal-transaction/constants';
+import { UnlockedPost } from '../../unlocked-post/models';
+import { PostViewer } from '../../post-viewer/models';
 
 
 export default {
+    // tv
+    async getTvs(ctx){
+		const { 
+            request: {
+                query
+            },
+            state: {
+                user: {
+                    _id
+                }
+            }
+        } = ctx
+
+        let tvs = null
+
+        const page = parseInt(query.page) || 1
+        const limit = parseInt(query.limit) || 30
+        const paginationMetaData = {}
+
+        const total = await Post.countDocuments({ creatorId: _id, isTv: true, active: true, deletedAt: { $eq: null } }).exec()
+        const startIndex = page === 1 ? 0 : (page - 1) * limit;
+        const endIndex = page * limit;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
+
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
+        }
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
+        }
+
+		try{
+            tvs = await Post
+                .find({ creatorId: _id, isTv: true,  active: true, deletedAt: { $eq: null } })
+                .select({ __v: 0 })
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Tvs`,
+            data: {
+                tvs
+            },
+            paginationMetaData
+        }
+	},
+
+    async getTvsByUserId(ctx){
+		const { 
+            request: {
+                query
+            },
+            state: {
+                user: {
+                    _id
+                },
+                userId
+            }
+        } = ctx
+        
+        let tvs = []
+
+        const page = parseInt(query.page) || 1
+        const limit = parseInt(query.limit) || 30
+        const paginationMetaData = {}
+
+        const total = await Post.countDocuments({ creatorId: userId, isTv: true, active: true, deletedAt: { $eq: null } }).exec()
+        const startIndex = page === 1 ? 0 : (page - 1) * limit;
+        const endIndex = page * limit;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
+
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
+        }
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
+        }
+
+		try{
+            const userTvs = await Post
+                .find({ creatorId: userId, isTv: true,  active: true, deletedAt: { $eq: null } })
+                .select({ __v: 0 })
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+
+            if(userTvs.length){
+                for(let i = 0; i < userTvs.length; i++){
+                    const unlockedPost = await UnlockedPost.findOne({ creatorId: _id, postId: userTvs[i]._id })
+
+                    tvs.push({ ...userTvs[i]._doc, unlocked: unlockedPost ? true : false }) 
+                }
+            }
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Tvs`,
+            data: {
+                tvs
+            },
+            paginationMetaData
+        }
+	},
+
+
+    // post
     async getPost(ctx){
 		const { 
             state: {
@@ -304,6 +446,53 @@ export default {
             message: 'Post successfully deleted',
             data: {
                 postId
+            }
+        }
+	},
+
+
+    async addViewer(ctx){
+		const {
+            state: {
+                user: {
+                    _id
+                },
+                postId
+            }
+        } = ctx
+
+        let post = null
+
+		try{
+            post = await Post.findOne({ _id: postId, active: true, deletedAt: { $eq: null } })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${id} not found`,
+                    data: null
+                }
+            }
+
+            post = await Post.findByIdAndUpdate(postId, { $inc: { countViewers: 1 } }, { new: true })
+
+            // save viewer
+            await PostViewer.create({ creatorId: _id, postId })
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `${ex.message}`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Viewer added`,
+            data: {
+                post
             }
         }
 	},
@@ -1021,7 +1210,7 @@ export default {
                         }, 
                         {
                             'j._id': replyId
-                        }, 
+                        },
                         {
                             'k._id': replyLikeId
                         }
@@ -1051,6 +1240,138 @@ export default {
         return ctx.body = {
             success: true,
             message: `Post comment reply like deleted`,
+            data: {
+                post
+            }
+        }
+	},
+
+
+    async unlockPost(ctx){
+		const { 
+            request: { 
+                body: {
+                    postId = null
+                }
+            },
+            state: {
+                user: {
+                    _id
+                }
+            }
+        } = ctx
+
+        if(!postId){
+            ctx.status = 400
+            return ctx.body = {
+                success: false,
+                message: `PostId not passed`,
+                data: null
+            }
+        }
+
+        let post = null
+
+		try{
+            post = await Post.findOne({ _id: postId, active: true, deletedAt: { $eq: null } })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${postId} not found`,
+                    dta: null
+                }
+            }
+
+            if(post.price === 0){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `User can not buy post. Post free`,
+                    data: null
+                }
+            }
+
+            let senderWallet = await Wallet.findOne({ creatorId: _id, active: true, deletedAt: { $eq: null } })
+            
+            if(!senderWallet){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Sender wallet not found`,
+                    data: null
+                }
+            }
+
+            if(senderWallet.coin < post.price){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `User does not have enough coin`
+                }
+            }
+
+            let recipientWallet = await Wallet.findOne({ creatorId: post.creatorId, active: true, deletedAt: { $eq: null } })
+
+            if(!recipientWallet){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Recipient wallet not found`
+                }
+            }
+
+            // update sender wallet
+            senderWallet.coin += -post.price
+
+            // update recipoient wallet
+            recipientWallet.coin += post.price
+
+            const currency = await Currency.find()
+
+            if(!currency.length){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Currency not found`,
+                    data: null
+                }
+            }
+
+            const amount = post.price * currency[0].exchangeRate
+
+            await InternalTransaction.create({
+                creatorId: _id,
+                senderId: _id,
+                senderWalletId: senderWallet._id,
+                recipientId: post.creatorId,
+                recipientWalletId: recipientWallet._id,
+                coin: post.price,
+                exchangeRate: currency[0].exhcangeRate,
+                currency: SOM,
+                amount,
+                p2tv: true
+            })
+
+            // save calculated coin
+            await senderWallet.save()
+            await recipientWallet.save()
+
+            // create unlocked post
+            await UnlockedPost.create({ creatorId: _id, userId: _id, postId: post._id  })
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `${ex.message}`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Post unlocked`,
             data: {
                 post
             }
