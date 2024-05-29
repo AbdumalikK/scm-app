@@ -81,6 +81,35 @@ const video = multer({
 // -----
 
 // ----- post tv -----
+const reelStorage = multer.diskStorage({
+	destination: async function (ctx, file, cb) {
+        const user = await getUser(ctx)
+
+        const videoDir = path.resolve(path.join(process.cwd() + `/uploads/videos/${user._id}/reel`))
+
+        if (!fs.existsSync(videoDir)){
+            fs.mkdirSync(videoDir, { recursive: true })
+        }
+
+        cb(null, `./uploads/videos/${user._id}/reel`) 
+    },
+
+	filename: function (ctx, file, cb) { cb(null, `${random()}-${Date.now()}-${file.originalname}`) }
+})
+
+const reelFilter = (ctx, file, cb) => {
+	if (file.mimetype === 'video/webm' || file.mimetype === 'video/mp4' || file.mimetype === 'video/ogg') cb(null, true)
+	else cb(null, false)
+}
+
+const reel = multer({
+	storage: reelStorage,
+	limits: { maxFileSize: 1024 * 1024 * 100 }, // 1tb
+	fileFilter: reelFilter
+})
+// -----
+
+// ----- post tv -----
 const tvStorage = multer.diskStorage({
 	destination: async function (ctx, file, cb) {
         const user = await getUser(ctx)
@@ -119,6 +148,10 @@ router
     .param('replyLikeId', checkReplyLikeId())
     .param('userId', checkUserId())
     
+    // reel
+    .get('/reel', checkUser(), postController.getReels)
+    .get('/reel/user/:userId', checkUser(), postController.getReelsByUserId)
+
     // tv
     .get('/tv', checkUser(), postController.getTvs)
     .get('/tv/user/:userId', checkUser(), postController.getTvsByUserId)
@@ -239,6 +272,52 @@ router
     })
 
 
+    // reels
+    .post('/upload/reel', checkUser(), reel.any('file'), async function (ctx){
+        const {
+            state: { user },
+            req: { files }
+        } = ctx
+
+        const reels = []
+
+        try {
+            for(let i = 0; i < files.length; i++){
+                const newReel = await Video.create({
+                    name: files[i].filename,
+                    originalName: files[i].originalname,
+                    data: files[i].path,
+                    encoding: files[i].encoding,
+                    size: files[i].size,
+                    mimetype: files[i].mimetype,
+                    creatorId: user._id,
+                    comment: POST,
+                    reels: true
+                })
+    
+                await newReel.save()
+                reels.push(newReel)
+            }
+        }catch(ex){
+            ctx.status = 500
+            return ctx.body = {
+                success: false,
+                message: ex.message,
+                data: null
+            }
+        }
+        
+
+        return ctx.body = {
+            success: true,
+            message: `Reels uploaded`,
+            data: {
+                reels
+            }
+        }
+    })
+
+
     // tv
     .post('/upload/tv', checkUser(), tv.any('file'), async function (ctx){
         const {
@@ -259,7 +338,7 @@ router
                     mimetype: files[i].mimetype,
                     creatorId: user._id,
                     comment: POST,
-                    isTv: true
+                    tv: true
                 })
     
                 await newTv.save()
@@ -283,5 +362,6 @@ router
             }
         }
     })
+
     
 export default router.routes()

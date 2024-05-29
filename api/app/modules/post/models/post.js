@@ -20,7 +20,11 @@ const PostSchema = new mongoose.Schema({
 		type: String,
 		default: null
 	},
-	isTv: {
+	reels: {
+		type: Boolean,
+		default: false
+	},
+	tv: {
 		type: Boolean,
 		default: false
 	},
@@ -163,7 +167,7 @@ const PostSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 PostSchema.statics.createFields = [ 
-	'mediaUri', 'title', 'description', 'isTv', 'price', 'audience', 
+	'mediaUri', 'title', 'description', 'tv', 'price', 'audience', 
 	'like', 'comment', 'gifts', 'tags', 'paid', 'countViewers'
 ]
 

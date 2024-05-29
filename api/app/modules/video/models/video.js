@@ -6,7 +6,11 @@ const VideoSchema = new mongoose.Schema({
     default: 'none',
     required: true
   },
-  isTv: {
+  tv: {
+    type: Boolean,
+    default: false
+  },
+  reels: {
     type: Boolean,
     default: false
   },

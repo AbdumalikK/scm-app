@@ -13,6 +13,134 @@ import { PostViewer } from '../../post-viewer/models';
 
 
 export default {
+    // reels
+    async getReels(ctx){
+		const { 
+            request: {
+                query
+            },
+            state: {
+                user: {
+                    _id
+                }
+            }
+        } = ctx
+
+        let reels = null
+
+        const page = parseInt(query.page) || 1
+        const limit = parseInt(query.limit) || 30
+        const paginationMetaData = {}
+
+        const total = await Post.countDocuments({ creatorId: _id, reels: true, active: true, deletedAt: { $eq: null } }).exec()
+        const startIndex = page === 1 ? 0 : (page - 1) * limit;
+        const endIndex = page * limit;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
+
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
+        }
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
+        }
+
+		try{
+            reels = await Post
+                .find({ creatorId: _id, reels: true,  active: true, deletedAt: { $eq: null } })
+                .select({ __v: 0 })
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Reels`,
+            data: {
+                reels
+            },
+            paginationMetaData
+        }
+	},
+
+    async getReelsByUserId(ctx){
+		const { 
+            request: {
+                query
+            },
+            state: {
+                user: {
+                    _id
+                },
+                userId
+            }
+        } = ctx
+        
+        let reels = []
+
+        const page = parseInt(query.page) || 1
+        const limit = parseInt(query.limit) || 30
+        const paginationMetaData = {}
+
+        const total = await Post.countDocuments({ creatorId: userId, reels: true, active: true, deletedAt: { $eq: null } }).exec()
+        const startIndex = page === 1 ? 0 : (page - 1) * limit;
+        const endIndex = page * limit;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
+
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
+        }
+
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
+        }
+
+		try{
+            reels = await Post
+                .find({ creatorId: userId, reels: true,  active: true, deletedAt: { $eq: null } })
+                .select({ __v: 0 })
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Reels`,
+            data: {
+                reels
+            },
+            paginationMetaData
+        }
+	},
+
+
+
     // tv
     async getTvs(ctx){
 		const { 
@@ -32,7 +160,7 @@ export default {
         const limit = parseInt(query.limit) || 30
         const paginationMetaData = {}
 
-        const total = await Post.countDocuments({ creatorId: _id, isTv: true, active: true, deletedAt: { $eq: null } }).exec()
+        const total = await Post.countDocuments({ creatorId: _id, tv: true, active: true, deletedAt: { $eq: null } }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
         paginationMetaData.page = page
@@ -52,7 +180,7 @@ export default {
 
 		try{
             tvs = await Post
-                .find({ creatorId: _id, isTv: true,  active: true, deletedAt: { $eq: null } })
+                .find({ creatorId: _id, tv: true,  active: true, deletedAt: { $eq: null } })
                 .select({ __v: 0 })
                 .sort({ createdAt: -1 })
                 .skip(startIndex)
@@ -95,7 +223,7 @@ export default {
         const limit = parseInt(query.limit) || 30
         const paginationMetaData = {}
 
-        const total = await Post.countDocuments({ creatorId: userId, isTv: true, active: true, deletedAt: { $eq: null } }).exec()
+        const total = await Post.countDocuments({ creatorId: userId, tv: true, active: true, deletedAt: { $eq: null } }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
         paginationMetaData.page = page
@@ -115,7 +243,7 @@ export default {
 
 		try{
             const userTvs = await Post
-                .find({ creatorId: userId, isTv: true,  active: true, deletedAt: { $eq: null } })
+                .find({ creatorId: userId, tv: true,  active: true, deletedAt: { $eq: null } })
                 .select({ __v: 0 })
                 .sort({ createdAt: -1 })
                 .skip(startIndex)
@@ -345,7 +473,7 @@ export default {
 		try{
             const user = await User.findById(_id)
 
-            if(data.isTv && !user.creator){
+            if(data.tv && !user.creator){
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
