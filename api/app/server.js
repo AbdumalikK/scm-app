@@ -6,8 +6,10 @@ import { Server } from 'socket.io'
 
 import app from './app'
 import { init } from './modules/chat/socket'
+import { SystemWallet } from './modules/system-wallet/models'
 import { PORT, REDIS_PORT, ERRORS, errors } from './config'
 import logger from './utils/logs/logger'
+
 
 // directories
 const imagesDir = path.resolve(path.join(process.cwd() + '/uploads/images'))
@@ -41,6 +43,12 @@ server.listen(PORT, (err) => {
 	console.log(`Listening at http://localhost:${PORT}`);
 });
 
+(async () => {
+    const systemWallet = await SystemWallet.findOne({ name: 'system' })
+
+    if(!systemWallet)
+        await SystemWallet.create({ name: 'system' })
+})()
 
 // socket io
 const io = new Server(server, {
@@ -63,7 +71,6 @@ const io = new Server(server, {
 init()
 
 // to do: notoficiation via socket 
-
 
 export default server;
 

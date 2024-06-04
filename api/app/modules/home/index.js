@@ -10,7 +10,7 @@ const router = new Router({ prefix: '/home' })
 router
     .param('id', checkId())
     
-    .get('/history', checkUser(), homeController.getHistories)
+    .get('/story', checkUser(), homeController.getStories)
     .get('/feed', checkUser(), homeController.getFeeds)
 
     // .post('/post/like', checkUser(), homeController.addLike)

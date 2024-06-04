@@ -18,6 +18,7 @@ import interest from './interest'
 import phonebook from './phonebook'
 import internalTransaction from './internal-transaction'
 import currency from './currency'
+import targetAudience from './target-audience'
 
 const router = new Router()
 
@@ -39,6 +40,7 @@ router.use(interest)
 router.use(phonebook)
 router.use(internalTransaction)
 router.use(currency)
+router.use(targetAudience)
 
 
 export default router.routes()

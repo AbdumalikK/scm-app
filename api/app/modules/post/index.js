@@ -147,6 +147,9 @@ router
     .param('replyId', checkReplyId())
     .param('replyLikeId', checkReplyLikeId())
     .param('userId', checkUserId())
+
+    // boost
+    .put('/:id/boost', checkUser(), postController.boost)
     
     // reel
     .get('/reel', checkUser(), postController.getReels)

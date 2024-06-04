@@ -10,6 +10,9 @@ import { InternalTransaction } from '../../internal-transaction/models';
 import { SOM } from '../../internal-transaction/constants';
 import { UnlockedPost } from '../../unlocked-post/models';
 import { PostViewer } from '../../post-viewer/models';
+import { TargetAudience } from '../../target-audience/models';
+import { Boost } from '../../boost/models';
+import { SystemWallet } from '../../system-wallet/models';
 
 
 export default {
@@ -603,7 +606,7 @@ export default {
                 }
             }
 
-            post = await Post.findByIdAndUpdate(postId, { $inc: { countViewers: 1 } }, { new: true })
+            // post = await Post.findByIdAndUpdate(postId, { $inc: { countViewers: 1 } }, { new: true })
 
             // save viewer
             await PostViewer.create({ creatorId: _id, postId })
@@ -1307,7 +1310,7 @@ export default {
 		try{
 			post = await Post.findOneAndUpdate(
                 { 
-                    _id: postId, 
+                    _id: postId,
                     creatorId: _id,
                     comment: {
                         $elemMatch: {
@@ -1325,8 +1328,8 @@ export default {
                         }
                     }
                 },
-                { 
-                    $set: { 
+                {
+                    $set: {
                         'comment.$[i].reply.$[j].like.$[k].active': false,
                         'comment.$[i].reply.$[j].like.$[k].deletedAt': new Date()
                     }
@@ -1502,6 +1505,129 @@ export default {
             message: `Post unlocked`,
             data: {
                 post
+            }
+        }
+	},
+
+
+    async boost(ctx){
+		const { 
+            request: { 
+                body
+            },
+            state: {
+                user: {
+                    _id
+                },
+                postId
+            }
+        } = ctx
+
+        const boostData = pick(body, Boost.createFields)
+
+        let post = null, boost = null
+
+		try{
+            let wallet = await Wallet.findOne({ creatorId: _id, active: true, deletedAt: { $eq: null } })
+            
+            if(!wallet){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Wallet not found`,
+                    data: null
+                }
+            }
+
+            const total = boostData.budget * boostData.duration
+
+            if(wallet.coin < total){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `User does not have enough money`,
+                    data: null
+                }                                                                                                                                                            
+            }
+
+            wallet.coin = wallet.coin - total
+
+            boost = await Boost.create({ creatorId: _id, postId, ...boostData })
+
+            if(body['targetAudienceOwn']){
+                const targetAudienceData = pick(body.targetAudienceOwn, TargetAudience.createFields)
+                
+                let targetAudience = await TargetAudience.findOne({ createdId: _id, postId, ...targetAudienceData, active: true, deletedAt: { $eq: null } })
+
+                if(!targetAudience){
+                    targetAudience = await TargetAudience.create({ creatorId: _id, postId, ...targetAudienceData })
+                }
+
+                boost = await Boost.findByIdAndUpdate(boost._id, { $set: { targetAudienceOwnId: targetAudience._id } }, { new: true })
+            }
+
+            post = await Post.findOne({ _id: postId, creatorId: _id })
+
+            // save calculated coins
+            await wallet.save()
+
+            // save coins to system wallet
+            await SystemWallet.findOneAndUpdate({ name: 'system', active: true, deletedAt: { $eq: null } }, { $inc: { coin: total } }, { new: true })
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `${ex.message}`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Post boosted`,
+            data: {
+                post,
+                boost
+            }
+        }
+	},
+
+    // insights
+    async getInsights(ctx){
+		const { 
+            request: {
+                query
+            },
+            state: {
+                user: {
+                    _id
+                }
+            }
+        } = ctx
+
+        let insights = null
+        
+		try{
+            const reels = await Post
+                .find({ creatorId: _id, reels: true,  active: true, deletedAt: { $eq: null } })
+                .select({ __v: 0 })
+                .sort({ createdAt: -1 })
+                .skip(startIndex)
+                .limit(limit)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Insights`,
+            data: {
+                insights
             }
         }
 	},
