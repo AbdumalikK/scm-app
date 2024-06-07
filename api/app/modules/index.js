@@ -19,6 +19,7 @@ import phonebook from './phonebook'
 import internalTransaction from './internal-transaction'
 import currency from './currency'
 import targetAudience from './target-audience'
+import shared from './shared'
 
 const router = new Router()
 
@@ -41,6 +42,6 @@ router.use(phonebook)
 router.use(internalTransaction)
 router.use(currency)
 router.use(targetAudience)
-
+router.use(shared)
 
 export default router.routes()

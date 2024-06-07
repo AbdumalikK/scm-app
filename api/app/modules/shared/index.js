@@ -4,7 +4,7 @@ import sharedController from './controllers/shared-controller'
 import checkUser from '../../handlers/checkUser'
 import checkId from './handlers/check-id'
 
-const router = new Router({ prefix: '/saved' })
+const router = new Router({ prefix: '/shared' })
 
 router
     .param('id', checkId())

@@ -197,7 +197,7 @@ export default {
 		
         return ctx.body = {
             success: true,
-            message: 'Sahred successfully deleted',
+            message: 'Shared successfully deleted',
             data: {
                 sharedId: id
             }
