@@ -13,6 +13,8 @@ import { PostViewer } from '../../post-viewer/models';
 import { TargetAudience } from '../../target-audience/models';
 import { Boost } from '../../boost/models';
 import { SystemWallet } from '../../system-wallet/models';
+import { AccountsReached } from '../../accounts-reached/models';
+import { Following } from '../../follow/models';
 
 
 export default {
@@ -1596,24 +1598,86 @@ export default {
     async getInsights(ctx){
 		const { 
             request: {
-                query
+                query: {
+                    dateFrom = null,
+                    dateTo = null
+                }
             },
             state: {
                 user: {
                     _id
-                }
+                },
+                postId
             }
         } = ctx
 
-        let insights = null
+        if(!dateFrom || !dateTo){
+            ctx.status = 400
+            return ctx.body = {
+                success: false,
+                message: `DateFrom or DateTo not passed`,
+                data: null
+            }
+        }
+
+        const insights = {}
         
-		try{
-            const reels = await Post
-                .find({ creatorId: _id, reels: true,  active: true, deletedAt: { $eq: null } })
-                .select({ __v: 0 })
-                .sort({ createdAt: -1 })
-                .skip(startIndex)
-                .limit(limit)
+        try{
+            const post = await Post.findOne({ _id: postId, creatorId: _id, createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) } })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${postId} does not belong to user with id=${_id}`,
+                    data: null
+                }
+            }
+
+            // shown
+            insights['accountsReached'] = await AccountsReached.countDocuments({ postId, createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) } }).exec() // miltiple times
+            insights['views'] = await PostViewer.countDocuments({ postId, createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) } }).exec() // only once
+
+            // post interactions
+            insights['postInteractions']['shares'] = await Shared.countDocuments({ 
+                creatorId: _id, 
+                senderId: _id, 
+                postId, 
+                active: true, 
+                deletedAt: { $eq: null }, 
+                createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) }
+            }).exec()
+            insights['postInteractions']['follows'] = await Following.countDocuments({ 
+                userId: _id, 
+                postId, 
+                active: true, 
+                deletedAt: { $eq: null }, 
+                createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) }
+            }).exec()
+            // insight['postInteractions']['profileVisits'] = await 
+
+            // profile activity
+            const comments = await Post.aggregate([ { $project: { count: { $size: '$comment' } }, $match: { createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) } } } ])
+            const likes = await Post.aggregate([ { $project: { count: { $size: '$like' } }, $match: { createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) } } } ])
+            insights['profileAcitivy']['comments'] = comments
+            insights['profileAcitivy']['likes'] = likes
+
+            // audience gender
+            let male = 0, female = 0, other = 0
+            const postViewers = await PostViewer.find({ postId, createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) } })
+            for(let i = 0; i < postViewers.length; i++){
+                const user = await User.findById(postViewers[i].creatorId)
+
+                switch(user.gender){
+                    case 'male': { male++; break }
+                    case 'female': { female++; break }
+                    default: { other++ }
+                }
+            }
+
+            insights['audienceGender']['male'] = male
+            insights['audienceGender']['female'] = female
+            insights['audienceGender']['other'] = other
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {

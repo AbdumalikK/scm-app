@@ -150,6 +150,10 @@ router
 
     // boost
     .put('/:id/boost', checkUser(), postController.boost)
+
+    //insights
+    .get('/:id/insights', checkUser(), postController.getInsights)
+
     
     // reel
     .get('/reel', checkUser(), postController.getReels)
