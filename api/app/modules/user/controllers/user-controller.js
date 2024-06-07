@@ -97,6 +97,19 @@ export default {
 		let user = {}
 
 		try{
+            if(data.phone){
+                user = await User.findOne({ _id: { $ne: _id }, phone: data.phone })
+
+                if(user){
+                    ctx.status = 400
+                    return ctx.body = {
+                        success: false,
+                        message: `User with phone=${data.phone} already exists`,
+                        data: null
+                    }
+                }
+            }
+
 			user = await User.findByIdAndUpdate(_id, { $set: data }, { new: true }).select({ 
                 __v: 0,
                 acive: 0,
