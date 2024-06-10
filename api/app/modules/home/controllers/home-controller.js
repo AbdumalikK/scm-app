@@ -2,6 +2,7 @@ import { Follower, Following } from '../../follow/models'
 
 import logger from '../../../utils/logs/logger'
 import { UserHistory } from '../../story/models';
+import { Post } from '../../post/models';
 
 
 export default {
@@ -80,52 +81,83 @@ export default {
             }
         } = ctx
 
-
-        let follows = null
-
         const page = parseInt(query.page) || 1
-        const limit = parseInt(query.limit) || 10
-        const result = {}
+        const limit = parseInt(query.limit) || 30
+        const paginationMetaData = {}
 
-        const select = {
-            __v: 0,
-            deletedAt: 0,
-            active: 0
+        const total = await Post.aggregate([
+            { $unwind: '$like' },
+            { $group: { _id: '$_id', like: { $push: '$like' }, size: { $sum:1 } } },
+            { $sort: { 'size': -1 } }
+        ]).exec()
+        const startIndex = page === 1 ? 0 : (page - 1) * limit;
+        const endIndex = page * limit;
+        paginationMetaData.page = page
+        paginationMetaData.totalPages = Math.ceil(total / limit)
+        paginationMetaData.limit = limit
+        paginationMetaData.total = total
+
+        if (startIndex > 0){
+            paginationMetaData.prevPage = page - 1
+            paginationMetaData.hasPrevPage = true
         }
 
-        const totalPosts = await Follower.countDocuments({ active: true }).exec()
-        const startIndex = page === 1 ? 0 : (page - 1) * limit
-        const endIndex = page * limit
-        result.totalPosts = totalPosts
-
-
-        if (startIndex > 0) {
-            result.previous = {
-                page: page - 1,
-                limit: limit
-            }
+        if (endIndex < total) {
+            paginationMetaData.nextPage = page + 1
+            paginationMetaData.hasNextPage = true
         }
         
-        if (endIndex < (await Follow.countDocuments({ active: true }).exec())) {
-            result.next = {
-                page: page + 1,
-                limit: limit
-            }
-        }
+        let feed = [], posts = []
 
 		try{
-            feed = await UserFollow
-                .find({ creator_id: _id, active: true, deletedAt: { $eq: null } })
-                .select(select)
-                .sort({ createdAt: -1 })
-                .skip(startIndex)
-                .limit(limit)
+            const followings = await Following.find({ creatorId: _id, active: true, deletedAt: { $eq: null } })
+
+            if(!followings.length){
+                posts = await Post.aggregate([
+                    { $unwind: '$like' },
+                    { $group: { _id: '$_id', like: { $push: '$like' }, size: { $sum:1 } } },
+                    { $sort: { 'size': -1 } },
+                    { $limit: limit }
+                ])
+
+                for(let i = 0; i < posts.length; i++) 
+                    feed.push(await Post.findById(posts[i]._id).select({ __v: 0 }))
+            }else{
+                skip = 0
+                for(let i = 0; i < followings.length; i++){
+                    if([3, 6].indexOf(i) > -1){
+                        let likedPost = await LikedPost(++skip)
+                        if(feed.includes(likedPost))
+                            likedPost = await LikedPost(++skip)
+
+                        if(likedPost.length){
+                            const ads = await Post.findOne({ tags: likedPost[0].tags }) // ads
+                            
+                            if(ads)
+                                feed.push(ads) // ads
+                        }else
+                            await PostFromFollowingUser(feed) // post from following user
+                        
+                    }else{
+
+                    }
+                }
+            }
+
+            async function LikedPost(skip){
+                return Post.find({ like: { $elemMatch: { creatorId: _id, active: true, deletedAt: { $eq: null } } } }).sort({ createdAt: -1 }).skip(skip)
+            }
+
+            async function PostFromFollowingUser(feed){
+                feed.push(await Post.findOne({ creatorId: followings[i].creatorId }).select({ __v: 0 }))
+                return feed.sort((p,c) => p.createdAt < c.createdAt)
+            }
 		}catch(ex){
 			logger.error(`----- Error. ${ex.status}: ${ex.message} -----`)
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error: ${ex.message}`
 			};
 		}
 		
@@ -133,8 +165,7 @@ export default {
             success: true,
             message: `Feeds`,
             data: {
-                follows,
-                pagination: result
+                feed
             },
         }
 	}

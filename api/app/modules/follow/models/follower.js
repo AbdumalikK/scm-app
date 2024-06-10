@@ -9,6 +9,10 @@ const FollowerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true
   },
+  postId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
   deletedAt: {
     type: Date,
     default: null
