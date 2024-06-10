@@ -630,6 +630,137 @@ export default {
         }
 	},
 
+    async addPostLike(ctx){
+		const {
+            state: {
+                user: {
+                    _id
+                },
+                postId
+            }
+        } = ctx
+
+		let post = {}
+
+        const data = {
+            creatorId: _id,
+            createdAt: new Date()
+        }
+
+		try{
+            post = await Post.findOne({
+                _id: postId, 
+                creatorId: _id,
+                like: {
+                    $elemMatch: {
+                        creatorId: _id
+                    }
+                }
+            })
+
+            if(post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Like already exists`,
+                    data: null
+                };
+            }
+
+			post = await Post.findOneAndUpdate({ _id: postId, creatorId: _id }, { $push: { like: data } }, { new: true }).select({ __v: 0 })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${_id} & creatorId=${_id} not found`,
+                    data: null
+                };
+            }
+		}catch(ex){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Post like added`,
+            data: {
+                post
+            }
+        }
+	},
+
+    async deletePostLike(ctx){
+		const {
+            state: {
+                user: {
+                    _id
+                },
+                postId,
+                postLikeId
+            }
+        } = ctx
+
+		let post = {}
+
+		try{
+			post = await Post.findOneAndUpdate(
+                {
+                    _id: postId, 
+                    creatorId: _id,
+                    like: {
+                        $elemMatch: {
+                            _id: postLikeId
+                        }
+                    }
+                },
+                {
+                    $set: { 
+                        'like.$[i].active': false,
+                        'like.$[i].deletedAt': new Date()
+                    }
+                },
+                {
+                    arrayFilters: [
+                        {
+                            'i._id': postLikeId
+                        }
+                    ],
+                    new: true
+                }
+            ).select({ __v: 0 })
+
+            if(!post){
+                ctx.status = 400
+                return ctx.body = {
+                    success: false,
+                    message: `Post with id=${_id} & creatorId=${_id} not found`,
+                    data: null
+                };
+            }
+		}catch(ex){
+			logger.error(`Error. ${ex.status} ${ex.message}`)
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+                data: null
+			};
+		}
+		
+        return ctx.body = {
+            success: true,
+            message: `Post comment like deleted`,
+            data: {
+                post
+            }
+        }
+	},
 
     async addPostComment(ctx){
 		const { 
@@ -1659,8 +1790,8 @@ export default {
             // profile activity
             const comments = await Post.aggregate([ { $project: { count: { $size: '$comment' } }, $match: { createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) } } } ])
             const likes = await Post.aggregate([ { $project: { count: { $size: '$like' } }, $match: { createdAt: { $gte: new Date(dateFrom), $lte: new Date(dateTo) } } } ])
-            insights['profileAcitivy']['comments'] = comments
-            insights['profileAcitivy']['likes'] = likes
+            insights['profileAcitivy']['comments'] = comments[0]['count']
+            insights['profileAcitivy']['likes'] = likes[0]['count']
 
             // audience gender
             let male = 0, female = 0, other = 0

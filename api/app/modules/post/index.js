@@ -9,8 +9,9 @@ import getUser from '../../handlers/get-user'
 import checkUser from '../../handlers/checkUser'
 import checkCommentId from './handlers/check-comment-id'
 import checkLikeId from './handlers/check-like-id'
-import checkReplyId from './handlers/check-reply-id'
-import checkReplyLikeId from './handlers/check-reply-like-id'
+import checkCommentLikeId from './handlers/check-comment-like-id'
+import checkCommentReplyId from './handlers/check-comment-reply-id'
+import checkCommentReplyLikeId from './handlers/check-comment-reply-like-id'
 import checkId from './handlers/check-id'
 import checkUserId from './handlers/check-user-id'
 
@@ -142,10 +143,11 @@ const router = new Router({ prefix: '/post' })
 
 router
     .param('id', checkId())
-    .param('commentId', checkCommentId())
     .param('likeId', checkLikeId())
-    .param('replyId', checkReplyId())
-    .param('replyLikeId', checkReplyLikeId())
+    .param('commentId', checkCommentId())
+    .param('commentLikeId', checkCommentLikeId())
+    .param('commentReplyId', checkCommentReplyId())
+    .param('commentReplyLikeId', checkCommentReplyLikeId())
     .param('userId', checkUserId())
 
     // boost
@@ -175,23 +177,28 @@ router
     // count views
     .post('/:id/viewer', checkUser(), postController.addViewer)
 
+    // like
+    .post('/:id/like', checkUser(), postController.addPostLike)
+    .delete('/:id/like/:likeId', checkUser(), postController.deletePostLike)
+
+
     // comment
     .post('/:id/comment', checkUser(), postController.addPostComment)
     .patch('/:id/comment/:commentId', checkUser(), postController.updatePostComment)
     .delete('/:id/comment/:commentId', checkUser(), postController.deletePostComment)
 
-    // comment likes
+    // comment like
     .post('/:id/comment/:commentId/like', checkUser(), postController.addPostCommentLike)
-    .delete('/:id/comment/:commentId/like/:likeId', checkUser(), postController.deletePostCommentLike)
+    .delete('/:id/comment/:commentId/like/:commentLikeId', checkUser(), postController.deletePostCommentLike)
 
     // reply on comment
     .post('/:id/comment/:commentId/reply', checkUser(), postController.addPostCommentReply)
-    .patch('/:id/comment/:commentId/reply/:replyId', checkUser(), postController.updatePostCommentReply)
-    .delete('/:id/comment/:commentId/reply/:replyId', checkUser(), postController.deletePostCommentReply)
+    .patch('/:id/comment/:commentId/reply/:commentReplyId', checkUser(), postController.updatePostCommentReply)
+    .delete('/:id/comment/:commentId/reply/:commentReplyId', checkUser(), postController.deletePostCommentReply)
 
-    // reply likes
+    // reply like
     .post('/:id/comment/:commentId/reply/:replyId/like', checkUser(), postController.addPostCommentReplyLike)
-    .delete('/:id/comment/:commentId/reply/:replyId/like/:replyLikeId', checkUser(), postController.deletePostCommentReplyLike)
+    .delete('/:id/comment/:commentId/reply/:replyId/like/:commentReplyLikeId', checkUser(), postController.deletePostCommentReplyLike)
 
     // media
     .post('/upload/video', checkUser(), video.any('file'), async function (ctx){

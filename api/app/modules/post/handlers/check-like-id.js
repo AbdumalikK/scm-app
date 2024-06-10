@@ -8,7 +8,7 @@ export default () => async (id, ctx, next) => {
         const post = await Post.findOne({
             active: true,
             deletedAt: { $eq: null },
-            'comment.like': {
+            like: {
                 $elemMatch: {
                     _id: id,
                     active: true,
@@ -35,7 +35,7 @@ export default () => async (id, ctx, next) => {
         }
     }
 
-    ctx.state.likeId = id
+    ctx.state.postLikeId = id
 
     await next()
 }

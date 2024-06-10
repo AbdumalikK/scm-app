@@ -45,8 +45,12 @@ const PostSchema = new mongoose.Schema({
 			type: Date,
 			required: true
 		},
-		status: {
-			type: Number, // 1 - created, 2 - removed
+		active: {
+			type: Boolean,
+			default: true
+		},
+		deletedAt: {
+			type: Date,
 			default: null
 		}
 	}],
