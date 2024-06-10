@@ -3,6 +3,7 @@ import { Follower, Following } from '../../follow/models'
 import logger from '../../../utils/logs/logger'
 import { UserHistory } from '../../story/models';
 import { Post } from '../../post/models';
+import mongoose from 'mongoose';
 
 
 export default {
@@ -131,16 +132,46 @@ export default {
                             likedPost = await LikedPost(++skip)
 
                         if(likedPost.length){
-                            const ads = await Post.findOne({ tags: likedPost[0].tags }) // ads
+                            const ads = await Post.aggregate([
+                                { $match: { tags: likedPost[0].tags, active: true, deletedAt: { $eq: null } } },
+                                { $limit : 1 },
+                                { $project: { __v: 0 } },
+
+                                // to do: get creatorId from rndom post
+                                // { 
+                                //     $lookup: {
+                                //         from: 'users',
+                                //         as: 'users',
+                                //         pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id',  ] }] }}}, { $project: { __v: 0, password: 0, deletedAt: 0 } }]
+                                //     }
+                                // },  
+                            ]) // ads
                             
-                            if(ads)
-                                feed.push(ads) // ads
+                            if(ads.length)
+                                feed.push(ads[0]) // ads
                         }else
                             await PostFromFollowingUser(feed) // post from following user
                         
                     }else{
+                        posts = await Post.aggregate([
+                            { $match: { creatorId: followings[i].userId, active: true, deletedAt: { $eq: null } } },
+                            { $limit : 1 },
+                            { $sort : { createdAt: -1 } },
+                            { $project: { __v: 0 } },
+                            { 
+                                $lookup: {
+                                    from: 'users',
+                                    as: 'users',
+                                    pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id', followings[i].userId ] }] }}}, { $project: { __v: 0, password: 0, deletedAt: 0 } }]
+                                }
+                            },
+                        ])
 
+                        feed.push(posts[0])
                     }
+
+                    if(limit === i+1)
+                        break
                 }
             }
 
