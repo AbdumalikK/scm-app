@@ -26,7 +26,7 @@ export default {
             active: 0
         }
 
-        const total = await Boosts.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec()
+        const total = await Boost.countDocuments({ creatorId: _id, active: true, deletedAt: { $eq: null } }).exec()
         const startIndex = page === 1 ? 0 : (page - 1) * limit;
         const endIndex = page * limit;
         paginationMetaData.page = page
