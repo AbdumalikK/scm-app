@@ -35,9 +35,9 @@
 		}
 	},
 	"sms": {
-	  "login": "fedorovich",
-	  "password": "Snp9v4S78L",
-	  "host": "http://91.204.239.44/broker-api/send"
+	  "login": "login",
+	  "password": "password",
+	  "host": "http://example.com/"
 	},
 	"errors_file_path": "/error_messages.json",
 	"charset": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
