@@ -274,7 +274,7 @@ export default {
 
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 30;
-    const search = query.search
+    const search = query.search || ''
     const paginationMetaData = {}
 
     const startIndex = page === 1 ? 0 : (page - 1) * limit;
@@ -338,7 +338,7 @@ export default {
 
     const page = parseInt(query.page) || 1
     const limit = parseInt(query.limit) || 30 
-    const search = query.search
+    const search = query.search || ''
     const paginationMetaData = {}
 
     const startIndex = page === 1 ? 0 : (page - 1) * limit;
@@ -353,7 +353,9 @@ export default {
 
     let reels = []
    
-    const total = await Post.countDocuments({ title: { $regex: search, $options: 'i' }, reels: true, active: true, deletedAt: { $eq: null } }).exec()
+    const total = search.length ? 
+      await Post.countDocuments({ title: { $regex: search, $options: 'i' }, reels: true, active: true, deletedAt: { $eq: null } }).exec() :
+      await Post.countDocuments({ reels: true, active: true, deletedAt: { $eq: null } }).exec()
     paginationMetaData.totalPages = Math.ceil(total / limit)
     paginationMetaData.total = total
 
@@ -363,11 +365,18 @@ export default {
     }
 
     try{
-      reels = await Post.find({ title: { $regex: search, $options: 'i' }, reels: true, active: true, deletedAt: { $eq: null } })
-      .select({ __v: 0, deletedAt: 0 })
-      .sort({ createdAt: -1 })
-      .skip(startIndex)
-      .limit(limit)
+      reels = search.length ? 
+        await Post.find({ title: { $regex: search, $options: 'i' }, reels: true, active: true, deletedAt: { $eq: null } })
+          .select({ __v: 0, deletedAt: 0 })
+          .sort({ createdAt: -1 })
+          .skip(startIndex)
+          .limit(limit)
+          :
+        await Post.find({ reels: true, active: true, deletedAt: { $eq: null } })
+          .select({ __v: 0, deletedAt: 0 })
+          .sort({ like: -1 })
+          .skip(startIndex)
+          .limit(limit)
     }catch(ex){
       ctx.status = 500
       return ctx.body = {
@@ -386,5 +395,176 @@ export default {
       },
       paginationMetaData
     }
-  }
+  },
+
+  async tags(ctx){
+    const {
+      request: {
+        query
+      },
+      state: {
+        user: {
+          _id
+        }
+      }
+    } = ctx
+
+    const page = parseInt(query.page) || 1
+    const limit = parseInt(query.limit) || 30
+    const search = query.search || ''
+    const paginationMetaData = {}
+
+    const startIndex = page === 1 ? 0 : (page - 1) * limit;
+    const endIndex = page * limit;
+    paginationMetaData.page = page
+    paginationMetaData.limit = limit
+
+    if (startIndex > 0){
+      paginationMetaData.prevPage = page - 1
+      paginationMetaData.hasPrevPage = true
+    }
+
+    let tags = []
+   
+    const total = await Post.countDocuments({ tags: { $in: search }, active: true, deletedAt: { $eq: null } }).exec()
+    paginationMetaData.totalPages = Math.ceil(total / limit)
+    paginationMetaData.total = total
+
+    if (endIndex < total) {
+      paginationMetaData.nextPage = page + 1
+      paginationMetaData.hasNextPage = true
+    }
+
+    try{
+      tags = await Post.find({ tags: { $in: search }, active: true, deletedAt: { $eq: null } })
+        .select({ __v: 0, deletedAt: 0 })
+        .sort({ createdAt: -1 })
+        .skip(startIndex)
+        .limit(limit)
+    }catch(ex){
+      ctx.status = 500
+      return ctx.body = {
+          success: false,
+          message: `Internal error`,
+          data: null
+      };
+    }
+       
+		
+    return ctx.body = {
+      success: true,
+      message: `Tags`,
+      data: {
+        tags
+      },
+      paginationMetaData
+    }
+  },
+
+  async popularTags (ctx){
+    const {
+      request: {
+        query
+      },
+      state: {
+        user: {
+          _id
+        }
+      }
+    } = ctx
+
+    let popularTags = []
+
+    let date = new Date()
+    date.setDate(date.getDate() - 7)
+
+    try{
+      popularTags = await Post.aggregate([
+        { $match: { createdAt: { $gte: date }, active: true, deletedAt: { $eq: null } } },
+        { $unwind: '$tags' },
+        { $group: { _id : '$tags', count : { $sum : 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 }
+      ])
+    } catch(ex){
+      ctx.status = 500
+      return ctx.body = {
+        success: false,
+        message: `Internal error`,
+        data: null
+      }
+    }
+
+    return ctx.body = {
+      success: true,
+      message: `Popular tags`,
+      data: {
+        popularTags
+      }
+    }
+  },
+
+  async tvs(ctx){
+    const {
+      request: {
+        query
+      },
+      state: {
+        user: {
+          _id
+        }
+      }
+    } = ctx
+
+    const page = parseInt(query.page) || 1
+    const limit = parseInt(query.limit) || 30
+    const search = query.search || ''
+    const paginationMetaData = {}
+
+    const startIndex = page === 1 ? 0 : (page - 1) * limit;
+    const endIndex = page * limit;
+    paginationMetaData.page = page
+    paginationMetaData.limit = limit
+
+    if (startIndex > 0){
+      paginationMetaData.prevPage = page - 1
+      paginationMetaData.hasPrevPage = true
+    }
+
+    let tvs = []
+   
+    const total = await Post.countDocuments({ title: { $in: search }, tvs: true, active: true, deletedAt: { $eq: null } }).exec()
+    paginationMetaData.totalPages = Math.ceil(total / limit)
+    paginationMetaData.total = total
+
+    if (endIndex < total) {
+      paginationMetaData.nextPage = page + 1
+      paginationMetaData.hasNextPage = true
+    }
+
+    try{
+      tvs = await Post.find({ title: { $in: search }, tvs: true, active: true, deletedAt: { $eq: null } })
+        .select({ __v: 0, deletedAt: 0 })
+        .sort({ createdAt: -1 })
+        .skip(startIndex)
+        .limit(limit)
+    }catch(ex){
+      ctx.status = 500
+      return ctx.body = {
+          success: false,
+          message: `Internal error`,
+          data: null
+      };
+    }
+       
+		
+    return ctx.body = {
+      success: true,
+      message: `Tvs`,
+      data: {
+        tvs
+      },
+      paginationMetaData
+    }
+  }   
 };
