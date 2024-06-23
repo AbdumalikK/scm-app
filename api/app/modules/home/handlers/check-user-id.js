@@ -8,19 +8,19 @@ export default () => async (id, ctx, next) => {
         const user = await User.findById(id)
         
         if(!user){
-            logger.error(`Error. User with id=${id} not found`)
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `User with id=${id} not found`
+                message: `User with id=${id} not found`,
+                data: null
             }
         }
     }catch(ex){
-        logger.error(`Error. ${ex.status} ${ex.message}`)
         ctx.status = 400
         return ctx.body = {
             success: false,
-            message: `Internal error`
+            message: `Internal error`,
+            data: null
         }
     }
 

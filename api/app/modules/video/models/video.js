@@ -6,6 +6,14 @@ const VideoSchema = new mongoose.Schema({
     default: 'none',
     required: true
   },
+  tv: {
+    type: Boolean,
+    default: false
+  },
+  reels: {
+    type: Boolean,
+    default: false
+  },
   data: {
     type: String,
     required: true
@@ -26,6 +34,10 @@ const VideoSchema = new mongoose.Schema({
   mimetype: {
     type: String,
     required: true
+  },
+  comment: {
+    type: String,
+    default: null
   },
   creatorId: {
     type: mongoose.Schema.Types.ObjectId,

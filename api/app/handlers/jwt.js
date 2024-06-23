@@ -2,40 +2,44 @@ import jwtService from '../services/jwt'
 
 import { ERRORS } from '../config'
 
-import logger from '../utils/logs/logger'
-import { UserService } from '../modules/user'
+import { User } from '../modules/user/models'
 
 export default () => async (ctx, next) => {
 	const { authorization } = ctx.headers
 
 	if(authorization) {
-		const { phone } = await jwtService.verify(authorization)
+		const { phone, email, username } = jwtService.verify(authorization)
 
-		if (!phone) {
+		if (!phone && !email && !username) {
 			ctx.status = 401
 			return ctx.body = {
-				status: 'error',
-				message: ERRORS['Unauthorized']
+				sucess: false,
+				message: ERRORS['Unauthorized'],
+				data: null
 			}
 		}
+
+		const cred = phone || email || username
 
 		let user = null
 
 		try {
-			user = await UserService.findOne(phone)
+			user = await User.findOne({ $or: [{ phone: cred }, { email: cred }, { username: cred }], active: true, deletedAt: { $eq: null } })
 		} catch (ex) {
 			ctx.status = 500
 			return ctx.body = {
-				status: 'error',
-				message: ERRORS[ex.name]
+				success: false,
+				message: ERRORS[ex.name],
+				data: null
 			}
 		}
 
 		if (!user) {
 			ctx.status = 401
 			return ctx.body = {
-				status: 'error',
-				message: ERRORS['Unauthorized']
+				success: false,
+				message: ERRORS['Unauthorized'],
+				data: null
 			}
 		}
 

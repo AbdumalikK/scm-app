@@ -4,11 +4,11 @@ import { FOLLOWERS, FOLLOWING } from '../constants'
 
 export default () => async (type, ctx, next) => {
     if(type !== FOLLOWERS || type !== FOLLOWING){
-        logger.error(`Error. Invalid value of param type. Got: ${type}. Expected: ${FOLLOWING} or ${FOLLOWERS}`)
         ctx.status = 400
         return ctx.body = {
             success: false,
-            message: `Invalid value of param type. Got: ${type}. Expected: ${FOLLOWING} or ${FOLLOWERS}`
+            message: `Invalid value of param type. Got: ${type}. Expected: ${FOLLOWING} or ${FOLLOWERS}`,
+            data: null
         }
     }
 

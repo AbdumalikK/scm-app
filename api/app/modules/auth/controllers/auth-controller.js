@@ -3,15 +3,14 @@ import randomatic from 'randomatic'
 
 import { ERRORS, JWT_SECRET } from '../../../config'
 import { client } from '../../../server'
-import { SIGNUP_PAYLOAD } from '../constants'
+import { SIGNUP_PAYLOAD, FORGOT_PASSWORD_PAYLOAD } from '../constants'
 import { SIGNUP_TYPE_PHONE, SIGNUP_TYPE_EMAIL } from '../constants/types'
 import { User } from '../../user/models'
+import { Wallet } from '../../wallet/models'
+import { Privacy } from '../../privacy/models'
 import { SMSService } from '../../../services/sms'
 import issueTokenPair from '../../../helpers/issueTokenPair'
-import genTokenPassword from '../../../services/jwt'
-import verifyTokenPassword from '../../../services/jwt'
-
-import logger from '../../../utils/logs/logger'
+import jwtService from '../../../services/jwt'
 import { MailService } from '../../../services/mail'
 import { OtpTraffic } from '../../otp'
 
@@ -24,8 +23,9 @@ export default {
 					type = null,
 					phone = null,
 					email = null,
-
-					username = null
+					password = null,
+					username = null,
+					refferal = null
 				}
 			}
 		} = ctx
@@ -34,11 +34,37 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Type is null`
+				message: `Type is null`,
+				data: null
 			};
 		}
 
-		let auth = {}
+		let auth = {}, user = null, to = null, userId = 0
+
+		try{
+			const count = await User.countDocuments({ active: true, deletedAt: { $eq: null } })
+			userId = count + 1
+
+			user = await User.findOne({ username })
+
+			if(user){
+				ctx.status = 400
+				return ctx.body = {
+					success: false,
+					message: `OTP could not be Sent because Username is already registered with us.`,
+					data: {
+						isUsernameAvailable: false
+					}
+				};
+			}
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
+			};
+		}
 
 		switch(type){
 			case SIGNUP_TYPE_PHONE: {
@@ -49,10 +75,36 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `Phone validation error`
+						message: `Phone validation error`,
+						data: null
 					};
 				}
 
+				try{
+					user = await User.findOne({ phone })
+		
+					if(user){
+						ctx.status = 400
+						return ctx.body = {
+							success: false,
+							message: `OTP could not be Sent because Phone is already registered with us.`,
+							data: {
+								isPhoneAvailable: false
+							}
+						};
+					}
+
+					user = await User.create({ id: userId, phone, password, username, refferal })
+				}catch(ex){
+					ctx.status = 500
+					return ctx.body = {
+						success: false,
+						message: `Internal error. ${ex.status} ${ex.message}`,
+						data: null
+					};
+				}
+
+				to = phone
 				auth['type'] = phone
 				break
 			}
@@ -65,11 +117,37 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `Email validation error`
+						message: `Email validation error`,
+						data: null
 					};
 				}
 
-				auth['type'] = phone
+				try{
+					user = await User.findOne({ email })
+		
+					if(user){
+						ctx.status = 400
+						return ctx.body = {
+							success: false,
+							message: `OTP could not be Sent because Email is already registered with us.`,
+							data: {
+								isEmailAvailable: false,
+							}
+						}
+					}
+		
+					user = await User.create({ id: userId, email, password, username, refferal })
+				}catch(ex){
+					ctx.status = 500
+					return ctx.body = {
+						success: false,
+						message: `Internal error. ${ex.status} ${ex.message}`,
+						data: null
+					};
+				}
+
+				to = email
+				auth['type'] = email
 				break
 			}
 
@@ -77,15 +155,16 @@ export default {
 				ctx.status = 400
 				return ctx.body = {
 					success: false,
-					message: `Invalid value of param type`
+					message: `Invalid value of param type`,
+					data: null
 				};
 			}
 		}
 
-		const to = type === SIGNUP_TYPE_PHONE ? phone : email
-
 		// check last otp date, date > 2 min then ok else error 
 		try{
+			await Privacy.create({ creatorId: user._id })
+
 			const lastOtpTraffic = await OtpTraffic.findOne({ to }).sort({ createdAt: -1 })
 
 			let date = new Date()
@@ -100,7 +179,8 @@ export default {
                 ctx.status = 400
                 return ctx.body = {
                     success: false,
-                    message: `Try again after ${min}:${(sec < 10 ? '0' : '') + sec}`
+                    message: `Try again after ${min}:${(sec < 10 ? '0' : '') + sec}`,
+					data: null
                     
                 }
 			}
@@ -108,31 +188,32 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 		
 		const otp = randomatic('0', 4)
 
 		try{
-			await client.set(otp, JSON.stringify(auth), 'EX', 60 * 15)
+			await client.set(otp, JSON.stringify(auth), 'EX', 60 * 5)
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
 		try{
-			const userData = pick(ctx.request.body, User.createFields)
-
-			await User.create({ ...userData })
+			await Wallet.create({ creatorId: user._id })
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
@@ -148,7 +229,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
@@ -158,14 +240,18 @@ export default {
 				ctx.status = 201
 				return ctx.body = {
 					success: true,
-					message: `Sms sent successfully`
+					message: `OTP Sent`,
+					data: {
+						isPhoneAvailable: true
+					}
 				}
 			})
 			.catch(async error => {
 				ctx.status = 500
 				return ctx.body = {
 					success: false,
-					message: `Failed to send sms. ${error.message}`
+					message: `Failed to send sms. ${error.message}`,
+					data: null
 				}
 			})
 		}else{
@@ -178,19 +264,23 @@ export default {
 				ctx.status = 201
 				return ctx.body = {
 					success: true,
-					message: `Email sent successfully`
+					message: `OTP Sent`,
+					data: {
+						isEmailAvailable: true
+					}
 				}
 			} catch (error) {
 				ctx.status = 500
 				return ctx.body = {
 					success: false,
-					message: `Failed to send email. ${error}`
+					message: `Failed to send email. ${error}`,
+					data: null
 				}
 			}
 		}
 	},
 
-	async signin(ctx){
+	async signupConfirm(ctx){
 		const {
 			request: {
 				body: {
@@ -203,7 +293,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: ERRORS['BadRequest']
+				message: ERRORS['BadRequest'],
+				data: null
 			}
 		}
 
@@ -217,7 +308,8 @@ export default {
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error. ${ex.status} ${ex.message}`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			};
 		}
 
@@ -225,7 +317,8 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Otp not found`
+				message: `Otp not found`,
+				data: null
 			}
 		}
 
@@ -240,12 +333,13 @@ export default {
 		 }
 
 		try {
-			user = await User.findOne({ $or: [{ phone: otpExist.type }, { email: otpExist.type }] }).select(select)
+			user = await User.findOne({ $or: [{ phone: otpExist.type }, { email: otpExist.type }], active: true, deletedAt: { $eq: null } }).select(select)
 		}catch(ex){
 			ctx.status = 404
 			return ctx.body = {
 				success: false,
-				message: `User not found`
+				message: `User not found`,
+				data: null
 			}
 		}
 
@@ -254,28 +348,31 @@ export default {
 
 			ctx.body = {
 				success: true,
-				message: {
+				message: `User successfully signed in`,
+				data: {
 					user,
 					token,
-					refreshToken
+					refreshToken,
 				}
 			}
 		}catch(ex){
 			ctx.status = 500
 			return ctx.body = {
 				success: false,
-				message: `Internal error`
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
 			}
 		}
 	},
 
-	async forgotPassword(ctx){
+	async signin(ctx){
 		const {
 			request: {
 				body: {
 					type = null,
-					phone = null,
-					email = null
+					username = null,
+					password = null,
+					phone = null
 				}
 			}
 		} = ctx
@@ -284,11 +381,10 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Type is null`
-			};
+				message: `Type not passed`,
+				data: null
+			}
 		}
-
-		let user = null, payload = {}
 
 		switch(type){
 			case SIGNUP_TYPE_PHONE: {
@@ -299,116 +395,435 @@ export default {
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `Phone validation error`
+						message: `Phone validation error`,
+						data: null
 					};
 				}
 
-				try {
-					user = await User.findOne({ phone }).select(select)
+				let user = null
+
+				try{
+					user = await User.findOne({ phone })
 				}catch(ex){
-					ctx.status = 404
+					ctx.status = 500
 					return ctx.body = {
 						success: false,
-						message: `User not found`
-					}
+						message: `Internal error. ${ex.status} ${ex.message}`,
+						data: null
+					};
 				}
 
 				if(!user){
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `User with phone=${phone} not found`
+						message: `User with phone=${phone} does not exist`,
+						data: null
 					};
 				}
 
-				payload['phone'] = user.phone
+				const otp = randomatic('0', 4)
 
-				break
+				try{
+					await client.set(otp, JSON.stringify(phone), 'EX', 60 * 5)
+				}catch(ex){
+					ctx.status = 500
+					return ctx.body = {
+						success: false,
+						message: `Internal error. ${ex.status} ${ex.message}`,
+						data: null
+					};
+				}
+
+				let newOtp = null
+
+				try{
+					newOtp = await OtpTraffic.create({ type, otp, to: phone })
+
+					setTimeout(async () => {
+						await OtpTraffic.findByIdAndUpdate(newOtp._id, { $set: { deletedAt: new Date() } })
+					}, 1000 * 60 * 2)
+				}catch(ex){
+					ctx.status = 500
+					return ctx.body = {
+						success: false,
+						message: `Internal error. ${ex.status} ${ex.message}`,
+						data: null
+					};
+				}
+
+				return SMSService(phone, SIGNUP_PAYLOAD(otp))	
+					.then(() => {
+						ctx.status = 201
+						ctx.set('x-remove-otp', otp) // need to be removed: -> dev purpose 	q
+						return ctx.body = {
+							success: true,
+							message: `OTP sent`,
+							data: null
+						}
+					})
+					.catch(async error => {
+						ctx.status = 500
+						return ctx.body = {
+							success: false,
+							message: `Failed to send OTP. ${error.message}`,
+							data: null
+						}
+					})
 			}
+
 			case SIGNUP_TYPE_EMAIL: {
-				const validation = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-				const passed = validation.test(email)
-			
-				if(!passed){
+				if(!username){
 					ctx.status = 400
 					return ctx.body = {
 						success: false,
-						message: `Email validation error`
-					};
+						message: `Username not passed`,
+						data: null
+					}
+				}
+		
+				if(!password){
+					ctx.status = 400
+					return ctx.body = {
+						success: false,
+						message: `Password not passed`,
+						data: null
+					}
+				}
+		
+				let user = null
+		
+				const select = { 
+					__v: 0,
+					deletedAt: 0,
+					updatedAt: 0,
+					createdAt: 0,
+					active: 0,
+					password: 0
+				 }
+		
+				try {
+					user = await User.findOne({ $or: [{ email: username }, { username }], active: true, deletedAt: { $eq: null } })
+				}catch(ex){
+					ctx.status = 404
+					return ctx.body = {
+						success: false,
+						message: `User not found`,
+						data: null
+					}
+				}
+		
+				if(!(user).comparePasswords(password)){
+					ctx.status = 403
+					return ctx.body = {
+						success: false, 
+						message: 'Invalid password',
+						data: null
+					}
 				}
 		
 				try {
-					user = await User.findOne({ email }).select(select)
+					user = await User.findById(user._id).select(select)
+					
+					const { token, refreshToken } = await issueTokenPair(user.username, user)
+		
+					ctx.body = {
+						success: true,
+						message: `User successfully signed in`,
+						data: {
+							user,
+							token,
+							refreshToken
+						}
+					}
 				}catch(ex){
-					ctx.status = 404
+					ctx.status = 500
 					return ctx.body = {
 						success: false,
-						message: `User not found`
+						message: `Internal error`,
+						data: null
 					}
 				}
-
-
-				if(!user){
-					ctx.status = 400
-					return ctx.body = {
-						success: false,
-						message: `User with email=${email} not found`
-					};
-				}
-
-				payload['email'] = user.email
-
 				break
 			}
+
 			default: {
 				ctx.status = 400
 				return ctx.body = {
 					success: false,
-					message: `Invalid value of param type`
+					message: `Invalid value of param type`,
+					data: null
 				};
 			}
 		}
+	},
 
-		payload['_id'] = user._id
-		payload['password'] = user.password
+	async signinConfirm(ctx){
+		const {
+			request: {
+				body: {
+					otp = null,
+				}
+			}
+		} = ctx
 
-		const token = genTokenPassword(payload, JWT_SECRET + user.password)
+		if(!otp){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Otp not passed`,
+				data: null
+			};
+		}
+
+		let phone = null
+
+		try{
+			phone = JSON.parse(await client.get(otp))
+
+			await client.del(otp)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
+			};
+		}
+
+		if(!phone){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Otp not found`,
+				data: null
+			}
+		}
+
+		let user = null
+
+		const select = { 
+			__v: 0,
+			deletedAt: 0,
+			updatedAt: 0,
+			createdAt: 0,
+			active: 0,
+			password: 0
+		}
+
+		try {
+			user = await User.findOne({ phone }).select(select)
+		}catch(ex){
+			ctx.status = 404
+			return ctx.body = {
+				success: false,
+				message: `User not found`,
+				data: null
+			}
+		}
+
+		if(!user){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `User with phone=${phone} not found`,
+				data: null
+			};
+		}
+		
+		try {
+			const { token, refreshToken } = await issueTokenPair(user.username, user)
+
+			ctx.body = {
+				success: true,
+				message: `User successfully signed in`,
+				data: {
+					user,
+					token,
+					refreshToken
+				}
+			}
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error`,
+				data: null
+			}
+		}
+	},
+
+	async forgotPassword(ctx){
+		const {
+			request: {
+				body: {
+					email = null
+				}
+			}
+		} = ctx
+
+		let user = null
 
 		
-		if(type === SIGNUP_TYPE_PHONE){
-			return SMSService(phone, FORGOT_PASSWORD_PAYLOAD(otp))
-			.then(data => {
-				ctx.status = 201
-				return ctx.body = {
-					success: true,
-					message: `Sms sent successfully`
-				}
-			})
-			.catch(async error => {
-				ctx.status = 500
-				return ctx.body = {
-					success: false,
-					message: `Failed to send sms. ${error}`
-				}
-			})
-		}else{
-			const link = `http://localhost:3000/auth/resset-password/${user._id}${token}`
+		const validation = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+		const passed = validation.test(email)
+	
+		if(!passed){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Email validation error`,
+				data: null
+			};
+		}
 
-			try {
-				const info = await MailService(email, link, username);
-				console.log('Message sent: %s', info.messageId);
-				
-				ctx.status = 201
-				return ctx.body = {
-					success: true,
-					message: `Email sent successfully`
+		try {
+			user = await User.findOne({ email, active: true, deletedAt: { $eq: null } }).select({ __v: 0 })
+		}catch(ex){
+			ctx.status = 404
+			return ctx.body = {
+				success: false,
+				message: `User not found`,
+				data: null
+			}
+		}
+
+
+		if(!user){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `User with email=${email} not found`,
+				data: null
+			};
+		}
+
+		const payload = {
+			_id: user._id,
+			email: user.email,
+			password: user.password
+		}
+
+		const otp = randomatic('0', 4)
+
+		try{
+			await client.set(otp, JSON.stringify(payload), 'EX', 60 * 5)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
+			};
+		}
+
+		try {
+			const info = await MailService(user.email, otp, user.username);
+			
+			ctx.status = 201
+			return ctx.body = {
+				success: true,
+				message: `OTP sent`,
+				data: {
+					messageId: info.messageId
 				}
-			} catch (error) {
-				ctx.status = 500
-				return ctx.body = {
-					success: false,
-					message: `Failed to send email. ${error}`
+			}
+		} catch (error) {
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Failed to send OTP. ${error}`,
+				data: null
+			}
+		}
+	},
+
+	async forgotPasswordConfirm(ctx){
+		const {
+			request: {
+				body: {
+					otp = null
 				}
+			}
+		} = ctx
+
+		if(!otp){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Otp not passed`,
+				data: null
+			};
+		}
+
+		let otpExist = null
+
+		try{
+			otpExist = JSON.parse(await client.get(otp))
+
+			await client.del(otp)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
+			};
+		}
+
+		if(!otpExist){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Otp not found`,
+				data: null
+			}
+		}
+
+		let user = null
+
+		try {
+			user = await User.findById(otpExist._id).select({ password: 1 })
+		}catch(ex){
+			ctx.status = 404
+			return ctx.body = {
+				success: false,
+				message: `User not found`,
+				data: null
+			}
+		}
+
+		if(!user){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `User with _id=${otpExist._id} not found`,
+				data: null
+			};
+		}
+
+		const payload = {
+			_id: user._id,
+			password: user.password,
+			otp,
+		}
+
+		try{
+			await client.set(JSON.stringify(user._id), JSON.stringify(payload), 'EX', 60 * 5)
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
+			};
+		}
+
+		ctx.body = {
+			success: true,
+			message: `Otp confirmed`,
+			data: {
+				_id: user._id
 			}
 		}
 	},
@@ -417,39 +832,64 @@ export default {
 		const {
 			request: {
 				body: {
-					type = null,
 					_id = null,
-					token = null,
-					otp = null
+					password = null
 				}
 			}
 		} = ctx
-
-		if(!type){
-			ctx.status = 400
-			return ctx.body = {
-				success: false,
-				message: `Type is null`
-			};
-		}
 
 		if(!_id){
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `Id is null`
+				message: `Id not passed`,
+				data: null
 			};
+		}
+
+		if(!password){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Password not passed`,
+				data: null
+			};
+		}
+
+		let userExist = null
+
+		try{
+			userExist = JSON.parse(await client.get(JSON.stringify(_id)))
+
+			await client.del(JSON.stringify(_id))
+		}catch(ex){
+			ctx.status = 500
+			return ctx.body = {
+				success: false,
+				message: `Internal error. ${ex.status} ${ex.message}`,
+				data: null
+			};
+		}
+
+		if(!userExist){
+			ctx.status = 400
+			return ctx.body = {
+				success: false,
+				message: `Id not found`,
+				data: null
+			}
 		}
 
 		let user = null
 
 		try {
-			user = await User.findById(_id)
+			user = await User.findById(userExist._id).select({ password: 1 })
 		}catch(ex){
 			ctx.status = 404
 			return ctx.body = {
 				success: false,
-				message: `User not found`
+				message: `User not found`,
+				data: null
 			}
 		}
 
@@ -457,29 +897,27 @@ export default {
 			ctx.status = 400
 			return ctx.body = {
 				success: false,
-				message: `User with email=${email} not found`
+				message: `User with id=${_id} not found`,
+				data: null
 			};
 		}
-
-
-		if(_id !== user._id){
-			ctx.status = 400
+		
+		try {		
+			user.password = password
+			await user.save()
+		}catch(ex){
+			ctx.status = 404
 			return ctx.body = {
 				success: false,
-				message: `User with _id=${_id} does not belong to user with _id=${user._id}`
-			};
+				message: ex.message,
+				data: null
+			}
 		}
-
-		const payload = verifyTokenPassword(token, JWT_SECRET + user.password)
-
-		const { password } = payload
-
-		user.password = password
-		await user.save()
 
 		ctx.body = {
 			success: true,
-			message: `Password successfully changed`
+			message: `Password successfully changed`,
+			data: null
 		}
 
 	}

@@ -7,11 +7,11 @@ export default () => async (id, ctx, next) => {
         const user = await User.findById(id)
 
         if(!user){
-            logger.error(`Error. User with id=${id} not found`)
             ctx.status = 400
             return ctx.body = {
                 success: false,
-                message: `User with id=${id} not found`
+                message: `User with id=${id} not found`,
+                data: null
             }
         }
     }catch(ex){
@@ -19,7 +19,8 @@ export default () => async (id, ctx, next) => {
         ctx.status = 500
         return ctx.body = {
             success: false,
-            message: ex.message
+            message: ex.message,
+            data: null
         }
     }
 

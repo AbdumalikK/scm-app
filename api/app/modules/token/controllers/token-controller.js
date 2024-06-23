@@ -33,6 +33,10 @@ export default {
         await TokenService.removeTokens({ email });
         await User.findOneAndUpdate({ email }, { status: 0 });
 
-        ctx.body = { success: true };
+        ctx.body = { 
+            success: true,
+            message: 'Signed out',
+            data: null 
+        }
     }
 }

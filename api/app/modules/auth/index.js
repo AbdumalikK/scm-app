@@ -53,7 +53,9 @@ passport.deserializeUser(function(obj, done) {
 
 router
 	.post('/auth/signup', check(), authController.signup)
+	.post('/auth/signup/confirm', check(), authController.signupConfirm)
 	.post('/auth/signin', check(), authController.signin)
+	.post('/auth/signin/confirm', check(), authController.signinConfirm)
 
 
 	// google auth
@@ -76,7 +78,7 @@ router
 	.get('/auth/facebook', check(), passport.authenticate('facebook'))
 	.get('/auth/facebook/callback', check(), passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/auth/failure' }))
 
-	.get('/profile', async (ctx) => {
+	.get('/prof', async (ctx) => {
 		if (ctx.isAuthenticated()) {
 			ctx.body = `Hi, ${ctx.state.user.displayName}!`;
 		} else {
@@ -89,12 +91,14 @@ router
 		ctx.status = 500
 		return ctx.body = {
 			success: false,
-			message: 'Somehting went wrong'
+			message: 'Somehting went wrong',
+			data: null
 		}
 	})
 
-	.post('/forgot-password', check(), authController.forgotPassword)
-	.post('/reset-password/:id/:token', check(), authController.resetPassword)
+	.post('/auth/forgot-password', check(), authController.forgotPassword)
+	.post('/auth/forgot-password/confirm', check(), authController.forgotPasswordConfirm)
+	.post('/auth/reset-password', check(), authController.resetPassword)
 	.get('/logout', async (ctx) => {
 		ctx.logout();
 		ctx.redirect('/');
