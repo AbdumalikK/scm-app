@@ -49,7 +49,7 @@ const UserSchema = new mongoose.Schema({
 	},
 	phone: {
 		type: String,
-		default: null,
+		default: null
 	},
 	verified: {
 		type: Boolean,
@@ -77,7 +77,7 @@ const UserSchema = new mongoose.Schema({
 	},
 	gender: {
 		type: String,
-		enum: ['male', 'female', 'other'],
+		enum: ['male', 'female', 'other', null],
 		default: null
 	},
 	area: {
